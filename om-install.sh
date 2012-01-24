@@ -65,7 +65,7 @@ function checkPreqs {
 		fi
 	fi
 } 
-# // checkPreqs
+# end checkPreqs
 
 function installPreqs {
 	# TODO one should use postgres-9.x in latest ubuntu
@@ -97,7 +97,7 @@ gem update --system 1.5.3
 
 # install Ruby extensions
 	gem install rake --version '0.8.7'
-	gem install rails --version '2.3.12'
+	gem install rails --version '2.3.8'
 	gem install friendly_id --version "~> 3.2.1"
 	gem install will_paginate --version "~> 2.3.16"
 	gem install net-ssh net-sftp nmap-parser bb-ruby rrd-ffi chronic packet mongrel fastercsv json_pure
@@ -176,33 +176,33 @@ touch /etc/collectd/openmetrics_types.db
 /etc/init.d/collectd restart
 
 }
-# // checkPreqs
+# end checkPreqs
 
+function installServer() {
+	echo -e -n "\n\nInstalling OpenMetrics server... "
+	su - $OM_USER -c "mkdir -p conf/nginx"
+	su - $OM_USER -c "mkdir -p htdocs" 
+	su - $OM_USER -c "mkdir -p logs/nginx"
+	su - $OM_USER -c "mkdir -p mongrel_cluster/conf mongrel_cluster/logs mongrel_cluster/webapps"
+	su - $OM_USER -c "mkdir -p nginx/conf nginx/logs nginx/scgi_temp nginx/tmp nginx/uwsgi_temp"
+	su - $OM_USER -c "mkdir -p run"
+	su - $OM_USER -c "mkdir -p scripts"
+
+	# FIXME fetch latest OpenMetrics from github or trac.openmetrics.net
+	su - $OM_USER -c "mkdir mongrel_cluster/webapps/openmetrics"
+	cp -r /home/mgrobelin/development/openmetrics/* $OM_INSTALL_DIR/mongrel_cluster/webapps/openmetrics
+	
+	echo "DONE"
+}
+# end installServer
+	
 function checkInput() {
 	# overwrite passed variable with last line of user input
 	if [ ! -z "$REPLY" ]; then
 		eval $*=\""$REPLY"\"
 	fi
 }
-# // checkInput
-
-
-#cd "$OM_INSTALL_DIR"
-#mkdir -p conf/nginx
-#mkdir -p htdocs 
-#mkdir -p logs/nginx
-#mkdir -p mongrel_cluster/{conf,logs,webapps}
-#mkdir -p nginx/{conf,logs,scgi_temp,tmp,uwsgi_temp}
-#mkdir -p run
-#mkdir -p scripts
-#cd mongrel_cluster/webapps/
-# FIXME fetch latest OpenMetrics from github or trac.openmetrics.net
-
-
-
-
-
-# FIXME create dedicated user account and create ssh keys
+# end checkInput
 
 
 echo -e '\n--------- Welcome to OpenMetrics ---------\n'
@@ -215,9 +215,28 @@ read -p "Do you want to create a new user on this host? [$dialogAddUser]: "; che
 
 if [ $dialogAddUser = "YES" ] ; then
 	read -p "Username? [$OM_USER]: "; checkInput OM_USER
-	echo -e "\n\nOk. I'm going to create a user called ${OM_USER}"
-	# create ssh keypair
-	useradd -c "OpenMetrics" -m -s /bin/sh --user-group ${OM_USER}
-	# FIXME ssh-key requests a dialog for passphrase, we need to create a private key without passphrase by commandline only
-	#su - $OM_USER -c "ssh-keygen -t rsa"
+	echo -e -n "\n\nOk. I'm going to create a user called '${OM_USER}'... "
+
+	if ERROR=$( useradd -c "OpenMetrics" -m -s /bin/bash --user-group ${OM_USER} 2>&1 ) ; then
+		echo "DONE"
+	else
+		echo "FAILED"
+		echo "$ERROR"
+	fi
+	
+	echo -e -n "Creating RSA keys for SSH... "
+	if su - $OM_USER -c "test -f \$HOME/.ssh/id_rsa_om" ; then
+		echo "FAILED"
+		echo "SSH keypair already in place."	
+	else
+		# generate ssh keys
+		if su - $OM_USER -c "ssh-keygen -q -t rsa -b 2048 -f \$HOME/.ssh/id_rsa_om -P ''" ; then
+			echo "DONE"
+		else
+			echo "FAILED"
+		fi
+	fi
+
 fi
+
+installServer
