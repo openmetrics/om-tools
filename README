@@ -1,0 +1,17 @@
+
+
+Welcome to OpenMetrics
+
+
+
+* Installation
+
+  Server
+    - checkout or download/extract the om-tools to a server of your choice
+    - execute ./om-installer.sh from within a shell - it will ask for some information
+
+
+  Client(s)
+    - checkout https://github.com/mgrobelin/om-tools to a host of your choice, e.g. the OpenMetrics server itself
+    - execute ./om-agent-installer.sh <clients hostname> <hostname of OpenMetrics server>
+    - NOTE you need to have an SSH server running on the client and a valid login for »root« user
