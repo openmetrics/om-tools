@@ -34,30 +34,50 @@ dialogPathToInstall="YES"
 
 
 # create temporary directory for setup files
-#TMPDIR=`mktemp --tmpdir=/tmp -d om-agent-install.XXXXXX`
-tmp=`mktemp -d om-agent-install.XXXXXX`
-TMPDIR="/tmp/${tmp}"
-mkdir ${TMPDIR}
+TMPDIR=`mktemp --tmpdir=/tmp -d om-agent-install.XXXXXX`
+TMPDIR_E=`echo ${TMPDIR} | sed -e 's/.*om-agent-install\(.*\)/\1/'`
+#tmp=`mktemp -d om-agent-install.XXXXXX`
+#TMPDIR="/tmp/${tmp}"
+#mkdir ${TMPDIR}
+echo "TMPDIR is set to $TMPDIR"
 LOGFILE="${TMPDIR}/install.log"
 
+# FIXME use getopts and check arguments more acurate
 if [ -z "$1" ] ;then
-	echo "Usage: `basename $0` <hostname|ip-adress>" >&2
+	echo "Usage: `basename $0` <hostname|ip-adress> <OpenMetrics server>" >&2
 	exit 42 
 else
 	HOST="$1"
-	export HOST
+	export HOST 
 fi
 
-function prepareInstall() {
+if [ -z "$2" ] ;then
+	echo "Usage: `basename $0` <hostname|ip-adress> <OpenMetrics server>" >&2
+	exit 42 
+else
+	OM_SERVER="$2"
+	export OM_SERVER
+fi
+
+
+
+
+function prepareInstall() {	
+	# substitute some placeholders in collectd config
+	env_vars="`env | grep 'OM_'`"
+	for var in $env_vars; do
+		vkey="`echo $var | cut -f1 -d=`"
+		vvalue="`echo $var | cut -f2 -d=`"		
+		sed -e "s:\$${vkey}:`echo $vvalue`:g" -i "${TMPDIR}/om-agent/etc/collectd/collectd.conf"
+	done
 	
-	return 0
 }
 # end prepareInstall
 
 function installAgent() {
 	echo -e "\n\nStarting installation... "
 	scp -q ${SSH_OPTIONS} -r ${TMPDIR} root@${HOST}:/tmp
-	ssh -q ${SSH_OPTIONS} root@${HOST} "sh /tmp/${tmp}/installOMAgent.sh"
+	ssh -q ${SSH_OPTIONS} root@${HOST} "sh /tmp/om-agent-install${TMPDIR_E}/installOMAgent.sh"
 	echo "DONE"
 } 
 # end InstallAgent
@@ -96,7 +116,8 @@ EOF
 	cat >> ${TMPDIR}/installOMAgent.sh << EOF
 if [ -d "${OM_AGENT_DIR}" ]; then echo "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
 mkdir -p "${OM_AGENT_DIR}"
-mv /tmp/${tmp}/om-agent/* ${OM_AGENT_DIR}/
+# this move doesnt include .git directory
+cp -r /tmp/om-agent-install${TMPDIR_E}/om-agent/* ${OM_AGENT_DIR}/
 chown -R $OM_USER:$OM_USER ${OM_AGENT_DIR}
 EOF
 	cd ${TMPDIR}
@@ -106,6 +127,7 @@ EOF
 	else
 		echo "FAILED"
 	fi
+	prepareInstall
 	installAgent	
 else
 	echo "FAILED"
