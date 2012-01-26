@@ -39,23 +39,23 @@ TMPDIR_E=`echo ${TMPDIR} | sed -e 's/.*om-agent-install\(.*\)/\1/'`
 #tmp=`mktemp -d om-agent-install.XXXXXX`
 #TMPDIR="/tmp/${tmp}"
 #mkdir ${TMPDIR}
-echo "TMPDIR is set to $TMPDIR"
+#echo "TMPDIR is set to $TMPDIR"
 LOGFILE="${TMPDIR}/install.log"
 
 # FIXME use getopts and check arguments more acurate
-if [ -z "$1" ] ;then
-	echo "Usage: `basename $0` <hostname|ip-adress> <OpenMetrics server>" >&2
+if [ -z "$2" ] ;then
+	echo "Usage: `basename $0` <hostname|ip of OpenMetrics server> <hostname|ip of install target>" >&2
 	exit 42 
 else
-	HOST="$1"
+	HOST="$2"
 	export HOST 
 fi
 
-if [ -z "$2" ] ;then
-	echo "Usage: `basename $0` <hostname|ip-adress> <OpenMetrics server>" >&2
+if [ -z "$1" ] ;then
+	echo "Usage: `basename $0` <hostname|ip of OpenMetrics server> <hostname|ip of install target>" >&2
 	exit 42 
 else
-	OM_SERVER="$2"
+	OM_SERVER="$1"
 	export OM_SERVER
 fi
 
@@ -119,9 +119,12 @@ mkdir -p "${OM_AGENT_DIR}"
 # this move doesnt include .git directory
 cp -r /tmp/om-agent-install${TMPDIR_E}/om-agent/* ${OM_AGENT_DIR}/
 chown -R $OM_USER:$OM_USER ${OM_AGENT_DIR}
+# create env file for agent
+echo OM_AGENT_DIR=\"${OM_AGENT_DIR}\" >> "${OM_AGENT_DIR}/om-agent.env"
+echo OM_SERVER=\"${OM_SERVER}\" >> "${OM_AGENT_DIR}/om-agent.env"
 EOF
 	cd ${TMPDIR}
-	echo -e -n "\n\nFetching latest version of OpenMetrics agent... "
+	echo -e -n "Fetching latest version of OpenMetrics agent... "
 	if ` git clone git://github.com/mgrobelin/om-agent.git >> ${LOGFILE} 2>&1` ; then
 		echo "DONE"
 	else
