@@ -26,7 +26,7 @@ then
 fi
 
 # read in some defaults
-source "${SELF_LOCATION}/om-install.d/defaults.env"
+. "${SELF_LOCATION}/om-install.d/defaults.env"
 
 # dialog defaults
 dialogAddUser="YES"
@@ -75,10 +75,13 @@ function prepareInstall() {
 # end prepareInstall
 
 function installAgent() {
-	echo -e "\n\nStarting installation... "
-	scp -q ${SSH_OPTIONS} -r ${TMPDIR} root@${HOST}:/tmp
-	ssh -q ${SSH_OPTIONS} root@${HOST} "sh /tmp/om-agent-install${TMPDIR_E}/installOMAgent.sh"
-	echo "DONE"
+	echo -e -n "Starting installation... "
+	if scp -q ${SSH_OPTIONS} -r ${TMPDIR} root@${HOST}:/tmp && ssh -q ${SSH_OPTIONS} root@${HOST} "sh /tmp/om-agent-install${TMPDIR_E}/installOMAgent.sh" ; then
+		echo "DONE"
+	else 
+		echo "FAILED"
+		exit 42
+	fi
 } 
 # end InstallAgent
 
@@ -129,6 +132,7 @@ EOF
 		echo "DONE"
 	else
 		echo "FAILED"
+		exit 42
 	fi
 	prepareInstall
 	installAgent	
@@ -137,15 +141,10 @@ else
 	# ... otherwise try again with password prompt
 	echo -e "Trying again to connect to host ${HOST} with password authentication... "
 	if ` ssh ${SSH_OPTIONS} root@${HOST} ":" ` ; then
-		echo "FAILED"
+		prepareInstall
+		installAgent
 	else
-		echo "FOO"
+		echo "FAILED"
+		exit 42
 	fi
 fi
-
-#if `ssh  root@${HOST} "" >> ${LOGFILE} 2>&1` ; then
-	#echo "DONE"
-#else
-#	echo "FAILED"
-#	exit 42
-#fi
