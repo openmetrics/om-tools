@@ -118,6 +118,10 @@ EOF
 	read -p "Which directory should be used to install the OpenMetrics agent? [$OM_AGENT_DIR]: "; checkInput OM_AGENT_DIR
 	cat >> ${TMPDIR}/installOMAgent.sh << EOF
 if [ -d "${OM_AGENT_DIR}" ]; then echo "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
+# install collectd
+apt-get install collectd >> /dev/null 2>&1
+/etc/init.d/collectd stop >> /dev/null 2>&1
+update-rc.d -f collectd remove >> /dev/null 2>&1
 mkdir -p "${OM_AGENT_DIR}"
 # this move doesnt include .git directory
 cp -r /tmp/om-agent-install${TMPDIR_E}/om-agent/* ${OM_AGENT_DIR}/
@@ -125,6 +129,9 @@ chown -R $OM_USER:$OM_USER ${OM_AGENT_DIR}
 # create env file for agent
 echo OM_AGENT_DIR=\"${OM_AGENT_DIR}\" >> "${OM_AGENT_DIR}/om-agent.env"
 echo OM_SERVER=\"${OM_SERVER}\" >> "${OM_AGENT_DIR}/om-agent.env"
+# start the agent
+# FIXME add some error handling if daemon doesn't starts
+su - $OM_USER -c "${OM_AGENT_DIR}/scripts/rc.collectd start >> /dev/null 2>&1"
 EOF
 	cd ${TMPDIR}
 	echo -e -n "Fetching latest version of OpenMetrics agent... "
