@@ -94,7 +94,7 @@ function checkInput() {
 # end checkInput
 
 # some options to get ssh/scp/svn working for remote access
-SSH_OPTIONS="-o ForwardAgent=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+SSH_OPTIONS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
 # check ssh connectivity for remote host, first with pubkey auth...
 echo -e -n "Checking passwordless SSH connectivity for host ${HOST}... "
@@ -111,7 +111,7 @@ useradd -c "OpenMetrics agent" -m -s /bin/bash --user-group ${OM_USER}
 EOF
 	else
 		# ask for user account that should be used and overwrite OM_USER
-		echo "FIXME select existing user"
+		echo "FIXME select existing user... defaulting to ${OM_USER}"
 	fi	
 	
 	#FIXME OM_INSTALL_DIR  should match do users home directory?
@@ -119,7 +119,7 @@ EOF
 	cat >> ${TMPDIR}/installOMAgent.sh << EOF
 if [ -d "${OM_AGENT_DIR}" ]; then echo "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
 # install collectd
-apt-get install collectd >> /dev/null 2>&1
+apt-get -y install collectd >> /dev/null 2>&1
 /etc/init.d/collectd stop >> /dev/null 2>&1
 update-rc.d -f collectd remove >> /dev/null 2>&1
 mkdir -p "${OM_AGENT_DIR}"
