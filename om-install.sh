@@ -100,7 +100,7 @@ gem update --system 1.5.3
 	gem install rails --version '2.3.8'
 	gem install friendly_id --version "~> 3.2.1"
 	gem install will_paginate --version "~> 2.3.16"
-	gem install net-ssh net-sftp nmap-parser bb-ruby rrd-ffi chronic packet mongrel fastercsv json_pure
+	gem install net-ssh net-sftp nmap-parser bb-ruby rrd-ffi chronic packet mongrel fastercsv json_pure ruby-graphviz
 
 # FIXME this is pg specific 
 	aptitude install postgresql-server-dev-8.4
