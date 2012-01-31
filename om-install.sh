@@ -153,10 +153,10 @@ LoadPlugin network
 LoadPlugin rrdtool
 <Plugin rrdtool>
 	DataDir "/var/lib/collectd/rrd"
-#	CacheTimeout 120
-#	CacheFlush 900
-#	WritesPerSecond 30
-#	RandomTimeout 0
+	CacheTimeout 120
+	CacheFlush 3600
+	WritesPerSecond 30
+	RandomTimeout 10
 #
 # The following settings are rather advanced
 # and should usually not be touched:
