@@ -75,7 +75,7 @@ function prepareInstall() {
 # end prepareInstall
 
 function installAgent() {
-	echo -e -n "Starting installation... "
+	echo -e -n "Starting installation (this may take a while)... "
 	if scp -q ${SSH_OPTIONS} -r ${TMPDIR} root@${HOST}:/tmp && ssh -q ${SSH_OPTIONS} root@${HOST} "sh /tmp/om-agent-install${TMPDIR_E}/installOMAgent.sh" ; then
 		echo "DONE"
 	else 
@@ -98,7 +98,7 @@ SSH_OPTIONS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
 # check ssh connectivity for remote host, first with pubkey auth...
 echo -e -n "Checking passwordless SSH connectivity for host ${HOST}... "
-if ` ssh -q -q -o "BatchMode=yes" ${SSH_OPTIONS} root@${HOST} ":" ` ; then 
+if ` ssh -q -q -o BatchMode=yes -o ConnectTimeout=3 ${SSH_OPTIONS} root@${HOST} ":" ` ; then 
 	echo "DONE"
 	# create user on remote host
 	read -p "Do you want me to create a new user on remote host? [$dialogAddUser]: "; checkInput dialogAddUser
@@ -107,8 +107,10 @@ if ` ssh -q -q -o "BatchMode=yes" ${SSH_OPTIONS} root@${HOST} ":" ` ; then
 		cat > ${TMPDIR}/installOMAgent.sh << EOF
 #!/bin/sh
 useradd -c "OpenMetrics agent" -m -s /bin/bash --user-group ${OM_USER}
-#install om server ssh-key 		
+# deploy om server ssh public key
+su - $OM_USER -c "umask 077; mkdir ~/.ssh && touch ~/.ssh/authorized_keys && echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA2O08fWzrqsLf4d2w8nC9TRB0mliODq0PcksdysVfaWX95Kiqnuj/9Ua/xwhJkrk3sxM04gToZeHatdtd3WgE5+ObgIxubVxdXxofi6m6UeuI1qgl2XUGwRc37v7LJLWHHaz39KeuJu+k8ItgbYH1wRfOOGMZVLX4C3X7KUzD/G320nNDIutiklBBmhss1s+V5wrT+VOcJXqgb4hZ2KXjxo71N3blZo1pPiE6ya/8hGue8pvOE5u1gI+MP5G0ItDxiH7WIMqSlF63zJAuX475RtjZUGfGqVSQQer4/1TXKokkgmkKYpVe/fQwYoZShoncjY0Syh94P0fmHDSx1s/qGQ== om@om' >> ~/.ssh/authorized_keys"
 EOF
+
 	else
 		# ask for user account that should be used and overwrite OM_USER
 		echo "FIXME select existing user... defaulting to ${OM_USER}"
@@ -145,13 +147,14 @@ EOF
 	installAgent	
 else
 	echo "FAILED"
+	exit 42
 	# ... otherwise try again with password prompt
-	echo -e "Trying again to connect to host ${HOST} with password authentication... "
-	if ` ssh ${SSH_OPTIONS} root@${HOST} ":" ` ; then
-		prepareInstall
-		installAgent
-	else
-		echo "FAILED"
-		exit 42
-	fi
+	#echo -e "Trying again to connect to host ${HOST} with password authentication... "
+	#if ` ssh ${SSH_OPTIONS} -o ConnectTimeout=3 root@${HOST} ":" ` ; then
+#		prepareInstall
+#		installAgent
+#	else
+#		echo "FAILED"
+#		exit 42
+#	fi
 fi
