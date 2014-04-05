@@ -100,10 +100,15 @@ gem update --system 1.5.3
 }
 
 function redhatPreqsInstall {
-	yum install collectd	
-	yum install rubygems 
-	yum install rubygem-rails
-	yum install rubygem-sqlite3
+	yum install collectd
+	yum install sqlite libsqlite3x-devel
+	# or rvm
+	yum install ruby ruby-devel
+	yum install rubygems rubygem-rails
+	# cd webdir bundle install
+	# rake db:migrate RAILS_ENV=development
+
+
 
 }
 
