@@ -17,6 +17,9 @@ function debianPreqsInstall {
 }
 
 function redhatPreqsInstall {
+
+    
+
 	yum install collectd
 	yum install sqlite libsqlite3x-devel
     yum install redis-server

@@ -1,29 +1,42 @@
 function checkPreqs {
+    required_tools=( ruby git ssh ssh-keygen rrdtool nmap collectd graphviz redis-server )
     log "Checking system for required tools & libraries...\n"
     debug "\$PATH is set to: $PATH\n"
 
+    # check tools, special threatment for ruby
     missing_tools=()
-    # tools here means required system-commands
-	for tool in ruby git ssh ssh-keygen rrdtool nmap collectd graphviz redis-server #postgres memcached
+	for tool in "${required_tools[@]}"
 	do
+	    if [ "$tool" = "ruby" ]; then continue; fi
  		if ! which $tool > /dev/null 2>&1
  		then
-    			log-red "Couldn't find '$tool' in \$PATH\n" >&2
+    			log-red "Couldn't find '$tool' in $PATH\n" >&2
     			missing_tools=("${missing_tools[@]} $tool")
     			ret=1
  		fi
 	done
 
+	# TODO ruby command may be provided by PATH or .rvm
+    if ! which ruby > /dev/null 2>&1 ;
+        then debug "Couldn't find 'ruby' in $PATH\n" >&2 ;
+        missing_tools=("${missing_tools[@]} ruby")
+        ret=1;
+    fi
+    #if [ -d "${HOME}/.rvm" ] ; then
+    #    rvm_pathes=(`find "${HOME}/.rvm/rubies/" -maxdepth 2 -type d -name 'bin'`)
+	#    debug "Found RVM pathes: ${rvm_pathes[@]}"
+    #fi
+
 	# some tools are missing
-	if [ $ret = "1" ] ; then
+	if [ $ret = 1 ] ; then
 	    debug "Missing tools:${missing_tools[@]}\n"
-		log-red "Whoops! This system lacks software needed to run Openmetrics.\n"
+		log-red "Whoops! This system lacks software needed to run Openmetrics: \n"
 		while true; do
 		    read -p "I'll try to fix this for you. Ok? [$dialogInstallPreqs]: "; evalYesNo dialogInstallPreqs
         done
         return 1
 	fi
 
-	# prerequisists success
+	# prerequisits check succeeded
 	return 0
 }

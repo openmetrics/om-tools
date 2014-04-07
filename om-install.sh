@@ -39,7 +39,7 @@ done
 source "${SELF_LOCATION}/om-install.d/defaults.env"
 
 # read in other functions
-for f in "${SELF_LOCATION}/om-install.d/*.in"; do source $f; done
+for f in ${SELF_LOCATION}/om-install.d/*.in; do source $f; done
 
 # dialog defaults
 dialogInstallPreqs="yes"
@@ -56,9 +56,8 @@ tempdir=`mktemp --tmpdir=/tmp -d om-install.XXXXXX`
 INSTALL_DIR="${tempdir}"
 cd "$INSTALL_DIR" || exit 42
 
-
-colorize 'Openmetrics\n'
-
+# let's do it...
+welcomeTeaser
 systemInfo
 
 # install missing tools if required
