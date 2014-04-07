@@ -1,0 +1,128 @@
+
+function debianPreqsInstall {
+    apt-get install nmap
+    apt-get install redis-server
+
+    # FIXME this whole ruby installation stuff needs to be smarter. use bundler and/or rvm?
+    # install latest Ruby gems
+    #wget "http://production.cf.rubygems.org/rubygems/rubygems-1.8.15.tgz"
+    #tar xfz rubygems-1.8.15.tgz
+    #cd rubygems-1.8.15
+    #ruby setup.rb
+    #if [ ! `which gem` ] ; then
+    #	ln -s /usr/bin/gem1.8 /usr/bin/gem # ubuntu / debian
+    #fi
+    # downgrade rubygems
+    #gem update --system 1.5.3
+}
+
+function redhatPreqsInstall {
+	yum install collectd
+	yum install sqlite libsqlite3x-devel
+    yum install redis-server
+	# or rvm
+	yum install ruby ruby-devel
+	yum install rubygems rubygem-rails
+	# cd webdir bundle install
+	# rake db:migrate RAILS_ENV=development
+}
+
+function installPreqs {
+	# FIXME add dialog to give user a chance to cancel if system detection is bad
+	case "$DistroBasedOn" in
+			debian)
+				debianPreqsInstall
+				;;
+
+			redhat)
+				redhatPreqsInstall
+				;;
+			*)
+				echo "Unsupported distribution. Sorry."
+				exit 42
+	esac
+
+	# FIXME checkout webapp and run `bundle install'
+
+
+	# install Ruby extensions
+	#gem install rails --version '4.0.3'
+	#gem install friendly_id --version "~> 3.2.1"
+	#gem install will_paginate --version "~> 2.3.16"
+	#gem install net-ssh net-sftp nmap-parser bb-ruby rrd-ffi chronic packet mongrel fastercsv json_pure ruby-graphviz
+
+	# FIXME this is pg specific
+	#aptitude install postgresql-server-dev-8.4
+	#gem install pg
+
+# create database user
+#su - postgres -c "createuser -d -S -R -l om"
+
+# configure collectd
+#echo -e "\n\nCreating collectd config"
+# FIXME this applies to debian
+#cd /etc/collectd
+#mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf-dist
+#cat > /etc/collectd/collectd.conf.openmetrics <<EOF
+## Config file for collectd(1) for OpenMetrics server installation
+##
+
+##Hostname "localhost"
+#FQDNLookup true
+##BaseDir "/var/lib/collectd"
+##PluginDir "/usr/lib/collectd"
+#TypesDB "/usr/share/collectd/types.db" "/etc/collectd/openmetrics_types.db"
+#Interval 10
+##ReadThreads 5
+
+#LoadPlugin unixsock
+#<Plugin unixsock>
+	#SocketFile "/var/run/collectd-socket"
+	#SocketGroup "${OM_USER}"
+	#SocketPerms "0770"
+#</Plugin>
+
+#LoadPlugin logfile
+#<Plugin logfile>
+  #LogLevel "debug"
+  #File "/var/log/collectd.log"
+  #Timestamp true
+  #PrintSeverity true
+#</Plugin>
+
+#LoadPlugin syslog
+#<Plugin syslog>
+	#LogLevel info
+#</Plugin>
+
+#LoadPlugin network
+#<Plugin network>
+	#Listen "*" "25826"
+#</Plugin>
+
+#LoadPlugin rrdtool
+#<Plugin rrdtool>
+	#DataDir "/var/lib/collectd/rrd"
+	#CacheTimeout 120
+	#CacheFlush 3600
+	#WritesPerSecond 30
+	#RandomTimeout 10
+##
+## The following settings are rather advanced
+## and should usually not be touched:
+##	StepSize 10
+##	HeartBeat 20
+##	RRARows 1200
+##	RRATimespan 158112000
+##	XFF 0.1
+#</Plugin>
+
+#Include "/etc/collectd/filters.conf"
+#Include "/etc/collectd/thresholds.conf"
+#EOF
+
+#ln -s collectd.conf.openmetrics collectd.conf
+#touch /etc/collectd/openmetrics_types.db
+#/etc/init.d/collectd restart
+
+}

@@ -1,0 +1,29 @@
+function checkPreqs {
+    log "Checking system for required tools & libraries...\n"
+    debug "\$PATH is set to: $PATH\n"
+
+    missing_tools=()
+    # tools here means required system-commands
+	for tool in ruby git ssh ssh-keygen rrdtool nmap collectd graphviz redis-server #postgres memcached
+	do
+ 		if ! which $tool > /dev/null 2>&1
+ 		then
+    			log-red "Couldn't find '$tool' in \$PATH\n" >&2
+    			missing_tools=("${missing_tools[@]} $tool")
+    			ret=1
+ 		fi
+	done
+
+	# some tools are missing
+	if [ $ret = "1" ] ; then
+	    debug "Missing tools:${missing_tools[@]}\n"
+		log-red "Whoops! This system lacks software needed to run Openmetrics.\n"
+		while true; do
+		    read -p "I'll try to fix this for you. Ok? [$dialogInstallPreqs]: "; evalYesNo dialogInstallPreqs
+        done
+        return 1
+	fi
+
+	# prerequisists success
+	return 0
+}
