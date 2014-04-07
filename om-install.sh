@@ -44,7 +44,7 @@ INSTALL_DIR="${tempdir}"
 cd "$INSTALL_DIR" || exit 42
 
 function checkPreqs {
-	for tool in ruby ri irb git ssh-keygen rrdtool nmap collectd graphviz #postgres memcached
+	for tool in ruby git ssh ssh-keygen rrdtool nmap collectd graphviz redis-server #postgres memcached
 	do
  		if ! which $tool > /dev/null 2>&1
  		then
@@ -70,38 +70,37 @@ function checkPreqs {
 
 function debianPreqsInstall {
 echo "NEEDS UPDATE! Sorry." && exit 42
-
-# TODO one should use postgres-9.x in latest ubuntu
-aptitude install ruby1.8 ruby1.8-dev ri1.8 irb1.8 librrd-ruby1.8 \
-				libopenssl-ruby1.8 libldap-ruby1.8 git postgresql-8.4 \
-				postgresql-server-dev-8.4 rrdtool memcached nmap collectd graphviz
+ 
+apt-get install nmap 
+apt-get install redis-server
 
 # basic check for ruby installation
 # FIXME 
-if [ ! `which ruby` ] ; then
-	ln -s /usr/bin/ruby1.8 /usr/bin/ruby # ubuntu / debian
-	ln -s /usr/bin/ri1.8 /usr/bin/ri # ubuntu / debian
-	ln -s /usr/bin/irb1.8 /usr/bin/irb # ubuntu / debian
-	ln -s /usr/lib/librrd.so.4 /usr/lib/librrd.so # ubuntu/debian
-fi
+#if [ ! `which ruby` ] ; then
+#	ln -s /usr/bin/ruby1.8 /usr/bin/ruby # ubuntu / debian
+#	ln -s /usr/bin/ri1.8 /usr/bin/ri # ubuntu / debian
+#	ln -s /usr/bin/irb1.8 /usr/bin/irb # ubuntu / debian
+#	ln -s /usr/lib/librrd.so.4 /usr/lib/librrd.so # ubuntu/debian
+#fi
 
 
 # FIXME this whole ruby installation stuff needs to be smarter. use bundler and/or rvm?
 # install latest Ruby gems
-wget "http://production.cf.rubygems.org/rubygems/rubygems-1.8.15.tgz"
-tar xfz rubygems-1.8.15.tgz 
-cd rubygems-1.8.15
-ruby setup.rb
-if [ ! `which gem` ] ; then
-	ln -s /usr/bin/gem1.8 /usr/bin/gem # ubuntu / debian
-fi
+#wget "http://production.cf.rubygems.org/rubygems/rubygems-1.8.15.tgz"
+#tar xfz rubygems-1.8.15.tgz 
+#cd rubygems-1.8.15
+#ruby setup.rb
+#if [ ! `which gem` ] ; then
+#	ln -s /usr/bin/gem1.8 /usr/bin/gem # ubuntu / debian
+#fi
 # downgrade rubygems
-gem update --system 1.5.3
+#gem update --system 1.5.3
 }
 
 function redhatPreqsInstall {
 	yum install collectd
 	yum install sqlite libsqlite3x-devel
+    yum install redis-server
 	# or rvm
 	yum install ruby ruby-devel
 	yum install rubygems rubygem-rails
