@@ -51,7 +51,7 @@ dialogAcceptSuggest="no"
 # we should be root to proceed
 if [ "$UID" != "0" ]  ; then
 	log-red "Run me with root privileges! Exiting.\n"
-	#exit 42
+	exit 42
 fi	
 
 # create temporary directory for setup files
@@ -68,34 +68,8 @@ if ! checkPreqs ; then
     installPreqs
 fi
 
-read -p "Do you want me to create a new user on this host? [$dialogAddUser]: "; evalYesNo dialogAddUser
-
-if $dialogAddUser ; then
-	read -p "Openmetrics user name: [$OM_USER]: "; evalInput OM_USER
-	echo -e -n "\n\nOk. I'm going to create a user called '${OM_USER}'... "
-
-	if ERROR=$( useradd -c "Openmetrics" -m -s /bin/bash --user-group ${OM_USER} 2>&1 ) ; then
-		echo "DONE"
-	else
-		echo "FAILED"
-		echo "$ERROR"
-	fi
-	
-	echo -e -n "Creating RSA keys for SSH... "
-	if su - $OM_USER -c "test -f \$HOME/.ssh/id_rsa_om" ; then
-		echo "FAILED"
-		echo "SSH keypair already in place."	
-	else
-		# generate ssh keys
-		if su - $OM_USER -c "ssh-keygen -q -t rsa -b 2048 -f \$HOME/.ssh/id_rsa_om -P ''" ; then
-			echo "DONE"
-		else
-			echo "FAILED"
-		fi
-	fi
-
-fi
+prepareUserAccount
 
 #installServer
-
+log-green "Installation finished successful!\n"
 exit 0

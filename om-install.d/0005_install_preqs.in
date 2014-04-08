@@ -174,3 +174,42 @@ function installPreqs {
 #/etc/init.d/collectd restart
 
 }
+
+function prepareUserAccount() {
+    #user exists?
+    log "Checking for openmetrics user account...\n"
+    if cut -d ':' -f 1 /etc/passwd | grep -e "^${OM_USER}\$" >> /dev/null 2>&1; then
+        log "User '${OM_USER}' already exists on this system. Using it...\n"
+    else
+        # preferred user account does not exist, ask to create it
+        log-red "User account '${OM_USER}' does not exist on this system.\n"
+        while true ; do
+            read -p "Do you want me to create a new user on this host? [$dialogAddUser]: "; evalYesNo dialogAddUser
+        done
+
+        if $dialogAddUser ; then
+            read -p "username: [$OM_USER]: "; evalInput OM_USER
+            log "Creating a new user with username '${OM_USER}'...\n"
+            if ERROR=$( useradd -c "openmetrics system user" -m -s /bin/bash --user-group ${OM_USER} 2>&1 ) ; then
+                : #noop
+            else
+                #log-red "FAILED"
+                log-red echo "$ERROR"
+                exit 42
+            fi
+        fi
+    fi
+
+    log "Checking '${OM_USER}' for usable SSH keypair...\n"
+    if su - $OM_USER -c "test -f \$HOME/.ssh/id_rsa_om" ; then
+        debug "SSH keypair already in place. No need to create a new one...\n"
+    else
+        # generate ssh keys
+        if su - $OM_USER -c "ssh-keygen -q -t rsa -b 2048 -f \$HOME/.ssh/id_rsa_om -P ''" ; then
+            debug "Successfully created SSH keypair for '${OM_USER}'...\n"
+        else
+            log-red "Failed to generate SSH keypair\n"
+            exit 42
+        fi
+    fi
+}

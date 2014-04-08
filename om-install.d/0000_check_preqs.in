@@ -1,6 +1,7 @@
 #!/bin/bash
 function checkPreqs {
-    required_tools=( ruby git ssh ssh-keygen rrdtool nmap collectd graphviz redis-server iftop pidgin mtr )
+    required_tools=( ruby git ssh ssh-keygen rrdtool nmap collectd redis-server ) #graphviz
+    local ret=0
     log "Checking system for required tools & libraries...\n"
     debug "PATH is set to: $PATH\n"
 
@@ -32,7 +33,7 @@ function checkPreqs {
 	# some tools are missing
 	if [ $ret = 1 ] ; then
 	    #echo "Missing tools: ${missing_tools[@]}"
-		log-red "Whoops! This system lacks software needed to run Openmetrics.\n"
+		log-red "Whoops! This system lacks software needed to run openmetrics.\n"
 		while true; do
 		    read -p "I'll try to fix this for you. Ok? [$dialogInstallPreqs]: "; evalYesNo dialogInstallPreqs
         done
