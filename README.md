@@ -21,7 +21,7 @@ bash ./om-install.sh
 
 Checkout/download and extract the contents of om-tools to a local directory of your choice. Run ''om-agent-install.sh'' to install the openmetrics agent on given client host.
 
-**NOTE** replace server_host and client_host with hostnames (or IP addresses) fitting to your environment.
+**NOTE** before executing, substitute server_host and client_host with hostnames (or IP addresses) fitting to your environment !
 
 ```
 cd /tmp
