@@ -1,4 +1,4 @@
-
+#!/bin/bash
 function debianPreqsInstall {
     apt-get install nmap
     apt-get install redis-server
@@ -18,14 +18,59 @@ function debianPreqsInstall {
 
 function redhatPreqsInstall {
 
-    
+    # suggest package install
+    if [ ! -z "${missing_tools[*]}" ] ; then
+        local suggested_pkgs
+        local tool
+        spinner $!
+        for tool in ${missing_tools[@]} ; do
+            # try to find package with rpm
+            if yum --quiet whatprovides $tool >> /dev/null 2>&1 ; then
+                # get package name from first hit
+                pkg_full=$( yum --quiet whatprovides $tool | head -n1 | cut -d ' ' -f1 )
+                pkg_name=$( extract_package_name "${pkg_full}" )
+                debug "Suggesting to install package ${pkg_name} (${pkg_full}) for tool ${tool}\n"
+                suggested_pkgs+=("${pkg_name}")
+            else
+                log-red "Couldn't find package suggestion for $tool\n"
+            fi
 
-	yum install collectd
-	yum install sqlite libsqlite3x-devel
-    yum install redis-server
+        done
+
+    fi
+
+    command=":" # bash noop
+    if [ ! -z "${suggested_pkgs[*]}" ] ; then
+        debug "Suggested packages to install: ${suggested_pkgs[@]}\n"
+        if [[ $_V -eq 0 ]]; then
+            command="yum --quiet -y install ${suggested_pkgs[@]}"
+        else
+            command="yum install ${suggested_pkgs[@]}"
+        fi
+    fi
+
+    log "Based on missing packages, I will issue this command for you now:"
+    log-cyan "\n\t${command}\n"
+
+    while true; do
+        read -p "Is this ok for you? [$dialogAcceptSuggest]: "; evalYesNo dialogAcceptSuggest
+    done
+
+    # run the suggested command
+
+    if $dialogAcceptSuggest ; then
+        debug "Executing ${command} "
+        spinner
+        ${command}
+    fi
+
+	#yum install collectd
+	#yum install sqlite libsqlite3x-devel
+    #yum install redis-server
+
 	# or rvm
-	yum install ruby ruby-devel
-	yum install rubygems rubygem-rails
+	#yum install ruby ruby-devel
+	#yum install rubygems rubygem-rails
 	# cd webdir bundle install
 	# rake db:migrate RAILS_ENV=development
 }

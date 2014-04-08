@@ -2,6 +2,8 @@
 #
 # this script will install OpenMetrics server (http://www.openmetrics.net)
 #
+# depends on: bash, ssh, yum or apt
+#
 
 set -o errexit # exit on all errors
 
@@ -44,11 +46,12 @@ for f in ${SELF_LOCATION}/om-install.d/*.in; do source $f; done
 # dialog defaults
 dialogInstallPreqs="yes"
 dialogAddUser="yes"
+dialogAcceptSuggest="no"
 
 # we should be root to proceed
 if [ "$UID" != "0" ]  ; then
 	log-red "Run me with root privileges! Exiting.\n"
-	exit 42
+	#exit 42
 fi	
 
 # create temporary directory for setup files
@@ -65,13 +68,13 @@ if ! checkPreqs ; then
     installPreqs
 fi
 
-read -p "Do you want to create a new user on this host? [$dialogAddUser]: "; evalInput dialogAddUser
+read -p "Do you want me to create a new user on this host? [$dialogAddUser]: "; evalYesNo dialogAddUser
 
-if [ $dialogAddUser = "YES" ] ; then
-	read -p "Username? [$OM_USER]: "; evalInput OM_USER
+if $dialogAddUser ; then
+	read -p "Openmetrics user name: [$OM_USER]: "; evalInput OM_USER
 	echo -e -n "\n\nOk. I'm going to create a user called '${OM_USER}'... "
 
-	if ERROR=$( useradd -c "OpenMetrics" -m -s /bin/bash --user-group ${OM_USER} 2>&1 ) ; then
+	if ERROR=$( useradd -c "Openmetrics" -m -s /bin/bash --user-group ${OM_USER} 2>&1 ) ; then
 		echo "DONE"
 	else
 		echo "FAILED"
@@ -93,4 +96,6 @@ if [ $dialogAddUser = "YES" ] ; then
 
 fi
 
-installServer
+#installServer
+
+exit 0
