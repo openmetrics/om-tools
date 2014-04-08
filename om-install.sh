@@ -41,12 +41,13 @@ done
 source "${SELF_LOCATION}/om-install.d/defaults.env"
 
 # read in other functions
-for f in ${SELF_LOCATION}/om-install.d/*.in; do source $f; done
+for f in ${SELF_LOCATION}/om-install.d/*.sh; do source $f; done
 
 # dialog defaults
 dialogInstallPreqs="yes"
 dialogAddUser="yes"
 dialogAcceptSuggest="no"
+dialogStartServices="yes"
 
 # we should be root to proceed
 if [ "$UID" != "0" ]  ; then
@@ -70,6 +71,8 @@ fi
 
 prepareUserAccount
 
-#installServer
-log-green "Installation finished successful!\n"
+if installServer ; then
+    log-green "Installation finished successfully!\n"
+fi
+
 exit 0
