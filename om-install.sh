@@ -2,12 +2,12 @@
 #
 # this script will install OpenMetrics server (http://www.openmetrics.net)
 #
-# depends on: bash, ssh, yum or apt
+# this script requires: bash, ssh, yum (Redhat) or apt-get and dpkg (Debian)
 #
 
 set -o errexit # exit on all errors
 
-
+#
 # find our location
 SELF_LOCATION=$(cd "$(dirname "$0")" ; pwd)
 
@@ -27,20 +27,12 @@ then
 	fi
 fi
 
-# get and set opts
-_V=0
-while getopts "v" OPTION
-do
-  case $OPTION in
-    v) _V=1
-       ;;
-  esac
-done
 
-# read in some defaults
+# some defaults
 source "${SELF_LOCATION}/om-install.d/defaults.env"
+source "${SELF_LOCATION}/om-install.d/functions.env"
 
-# read in other functions
+# read in other globals & functions
 for f in ${SELF_LOCATION}/om-install.d/*.sh; do source $f; done
 
 # dialog defaults
@@ -49,16 +41,35 @@ dialogAddUser="yes"
 dialogAcceptSuggest="no"
 dialogStartServices="yes"
 
+#
+# help & usage
+function print_usage {
+	echo -e "Usage: `basename $0` [<Option> ...]\n"
+	echo -e "Options:"
+	echo -e "  -v\t\t\tenable verbose output"
+	echo -e "  -h\t\t\tprint this help"
+}
+
+
+# get and set opts
+#
+_V=0
+NO_ARGS=0
+OPTERROR=65
+while getopts ":vh" Option ; do
+	case $Option in
+	    v) _V=1 ;;
+	    h) print_usage; exit 0;;
+		* ) log-red "Invalid option!\n"; print_usage; exit 42;;
+	esac
+done
+shift $(($OPTIND - 1)) # Decrements the argument pointer so it points to next argument.
+
 # we should be root to proceed
 if [ "$UID" != "0" ]  ; then
 	log-red "Run me with root privileges! Exiting.\n"
 	exit 42
-fi	
-
-# create temporary directory for setup files
-tempdir=`mktemp --tmpdir=/tmp -d om-install.XXXXXX`
-INSTALL_DIR="${tempdir}"
-cd "$INSTALL_DIR" || exit 42
+fi
 
 # let's do it...
 welcomeTeaser
@@ -72,7 +83,7 @@ fi
 prepareUserAccount
 
 if installServer ; then
-    log-green "Installation finished successfully!\n"
+    log-green "Installation of openmetrics server finished successfully!\n"
 fi
 
 exit 0

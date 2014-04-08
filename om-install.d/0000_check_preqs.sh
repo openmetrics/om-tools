@@ -33,7 +33,7 @@ function checkPreqs {
 	# some tools are missing
 	if [ $ret = 1 ] ; then
 	    #echo "Missing tools: ${missing_tools[@]}"
-		log-red "Whoops! This system lacks software needed to run openmetrics.\n"
+		log-red "Oh snap! This system lacks software needed to run openmetrics.\n"
 		while true; do
 		    read -p "I'll try to fix this for you. Ok? [$dialogInstallPreqs]: "; evalYesNo dialogInstallPreqs
         done

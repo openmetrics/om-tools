@@ -2,7 +2,7 @@
 function installServer() {
     # install dir already exists? better quit...
     su - $OM_USER -c "test -d \"${OM_INSTALL_DIR}\"" &&
-    log-red "Apparently there already exists an openmetrics installation in '${OM_INSTALL_DIR}'\n" &&
+    log-red "Apparently there already exists a server in '${OM_INSTALL_DIR}'\n" &&
     log-cyan "You may want to run '${SELF_LOCATION}/om-update.sh' instead of this script.\n" &&
     exit 42
 
@@ -20,8 +20,9 @@ function installServer() {
 
 	log "Fetching openmetrics server sources...\n"
 	debug "Using this git clone command: ${OM_GIT_CMD}\n"
-	su - $OM_USER -c "cd \"${OM_INSTALL_DIR}/om-server\" && ${OM_GIT_CMD} om-server" # checks out selected branch to dir om-server
+	su - $OM_USER -c "cd \"${OM_INSTALL_DIR}\" && ${OM_GIT_CMD} om-server >> /dev/null" # checks out selected branch to dir om-server
 
 	log "Installing missing ruby gems...\n"
+	debug "Running bundle install\n"
     su - $OM_USER -c "cd \"${OM_INSTALL_DIR}/om-server\" && bundle install"
 }
