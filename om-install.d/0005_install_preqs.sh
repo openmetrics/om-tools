@@ -2,6 +2,19 @@
 
 function debian_preqs_install {
 
+    # TODO install recent postgres
+    # echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" | sudo tee -a /etc/apt/sources.list
+    # wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+    # sudo apt-get update
+    # install postgres server, dev package to build ruby pg extension and postgres-contrib for hstore extension
+    # sudo apt-get install postgresql-9.3 libpq-dev postgresql-contrib-9.3
+    # install hstore extension as db superuser
+    # CREATE EXTENSION hstore; 
+    # setup pg-user and db
+    # createuser --createdb --login --pwprompt kobold
+    # createdb --owner=kobold openmetrics_development
+    # createdb --owner=kobold openmetrics_test
+
     # suggest package to install
     if [ ! -z "${missing_tools[*]}" ] ; then
         local suggested_pkgs pkg_name tool command
