@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+
+# source in environment and functions
+THIS_DIR="$( cd "$( dirname "$0" )" && pwd )"
+. "${THIS_DIR}/../config/instance.env"
+. "${THIS_DIR}/functions.sh"
+
+# which collectd binary to use?
+if [ -x /usr/local/collectd/sbin/collectd ]
+then
+        COLLECTD="/usr/local/collectd/sbin/collectd"
+elif [ -x /usr/sbin/collectd ]
+then
+		COLLECTD="/usr/sbin/collectd"
+elif [ -x /www/collectd/sbin/collectd ]
+then
+		COLLECTD="/www/collectd/sbin/collectd"
+else
+        echo "No collectd binary installed"
+        exit 42
+fi
+
+
+
+case "$1" in
+
+	# collectd options
+	# -c configfile
+
+	"start")
+		echo "Starting collectd... "
+		env2conf collectd.conf
+		${COLLECTD} -C ${OM_BASE_DIR}/config/collectd/collectd.conf -P ${OM_BASE_DIR}/run/collectd/collectd.pid
+	;;
+
+	"stop")
+		echo -n "Stopping collectd... "
+        echo "TODO"
+        exit 42
+	;;
+
+	"restart")
+		$0 stop
+		$0 start
+	;;
+
+  *)
+  		echo "unknown option"
+		return_code=$?
+	;;
+esac
+
+[ -n "$return_code" ] && exit $return_code || eval

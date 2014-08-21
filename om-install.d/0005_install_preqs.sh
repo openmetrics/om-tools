@@ -151,7 +151,7 @@ function installPreqs {
 
 function prepareUserAccount() {
     #user exists?
-    log "Checking for openmetrics user account...\n"
+    log "Checking for Openmetrics user account...\n"
     if cut -d ':' -f 1 /etc/passwd | grep -e "^${OM_USER}\$" >> /dev/null 2>&1; then
         log "User '${OM_USER}' already exists on this system. Using it...\n"
     else
@@ -164,7 +164,7 @@ function prepareUserAccount() {
         if $dialogAddUser ; then
             read -p "username: [$OM_USER]: "; evalInput OM_USER
             log "Creating a new user with username '${OM_USER}'...\n"
-            if ERROR=$( useradd -c "openmetrics system user" -m -s /bin/bash --user-group ${OM_USER} 2>&1 ) ; then
+            if ERROR=$( useradd -c "Openmetrics system user" -m -s /bin/bash --user-group ${OM_USER} 2>&1 ) ; then
                 : #noop
             else
                 log-red "${ERROR}"
