@@ -1,6 +1,6 @@
 #!/bin/bash
 function checkPreqs {
-    required_tools=( ruby git ssh ssh-keygen rrdtool nmap collectd redis-server ) #graphviz
+    required_tools=( git curl ssh ssh-keygen rrdtool nmap collectd redis-server ) # ruby rvm nodejs graphviz
     unresolvable_tools=()
     local ret=0
     log "Checking system for required tools & libraries...\n"
@@ -42,9 +42,9 @@ function checkPreqs {
 	fi
 
 	# install dir already exists? better quit...
-    su - $OM_USER -c "test -d \"${OM_BASE_DIR}\"" &&
+    test -d "${OM_BASE_DIR}" &&
     log-red "Apparently there already exists an Openmetrics installation in '${OM_BASE_DIR}'\n" &&
-    log "I'll better quit myself. You may want to run '${SELF_LOCATION}/om-update.sh' instead.\n" &&
+    log "You may want to run '${SELF_LOCATION}/om-update.sh' instead.\n" &&
     exit 42
 
 	# prerequisites check succeeded

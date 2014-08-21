@@ -20,12 +20,24 @@ function installServer() {
 	    exit 1
 	fi
 
-	log "Installing missing Ruby gems...\n"
-    su - $OM_USER -c "cd \"${OM_BASE_DIR}/om-server\" && bundle install >> /dev/null 2>&1"
+	log "Installing Ruby and missing gems...\n"
+    # source in rvm environment
+    # TODO make less noisy
+    su - $OM_USER -c "source /etc/profile.d/rvm.sh && rvm get stable"
+    su - $OM_USER -c "rvm install 2.1.1 --disable-binary && rvm use 2.1.1"
+    su - $OM_USER -c "cd \"${OM_BASE_DIR}/om-server\" && bundle install --without development test >> /dev/null"
     if [ $? -gt 0 ] ; then
 	    log-red "Failed to execute bundle install!\n"
+	    # run bundle again to fetch full error output
+	    if [[ $_V -eq 1 ]]; then
+            su - $OM_USER -c "cd \"${OM_BASE_DIR}/om-server\" && bundle install"
+	    fi
 	    exit 1
 	fi
+
+    log "Create and migrate database...\n"
+    # TODO make less noisy
+	su - $OM_USER -c "export RAILS_ENV=development; cd \"${OM_BASE_DIR}/om-server\" && rake db:create && rake db:migrate"
 
 	writeConfig
 }

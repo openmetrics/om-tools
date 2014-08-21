@@ -70,6 +70,9 @@ function debian_preqs_install {
 
 function redhat_preqs_install {
 
+#https://wiki.postgresql.org/wiki/YUM_Installation#Configure_your_YUM_repository
+#http://yum.postgresql.org/repopackages.php#pg93
+
     # suggest package to install
     if [ ! -z "${missing_tools[*]}" ] ; then
         local suggested_pkgs pkg_full pkg_name command
@@ -146,7 +149,10 @@ function installPreqs {
 				exit 42
 	esac
 
-	# TODO checkout webapp and run bundle install
+    # rvm install
+    log "I'm installing Ruby by rvm now..."
+    curl -sSL https://get.rvm.io | bash
+
 }
 
 function prepareUserAccount() {
@@ -172,6 +178,11 @@ function prepareUserAccount() {
             fi
         fi
     fi
+
+    # rvm installer says one should to add the user to group rvm
+    # dunno if needed or not
+    usermod -G rvm om
+
     log "Checking user '${OM_USER}' for usable SSH keypair...\n"
     if su - $OM_USER -c "test -f \$HOME/.ssh/id_rsa_om" ; then
         debug "SSH keypair already in place. No need to create a new one...\n"
