@@ -20,9 +20,15 @@ function installServer() {
 
 	log "Fetching openmetrics server sources...\n"
 	debug "Using this git clone command: ${OM_GIT_CMD}\n"
-	su - $OM_USER -c "cd \"${OM_INSTALL_DIR}\" && ${OM_GIT_CMD} om-server >> /dev/null" # checks out selected branch to dir om-server
+	su - $OM_USER -c "cd \"${OM_INSTALL_DIR}\" && ${OM_GIT_CMD} om-server >> /dev/null 2>&1" # checks out selected branch to dir om-server
+	if [ $? -gt 0 ] ; then
+	    log-red "Failed to execute ${OM_GIT_CMD}!\n"
+	fi
 
-	log "Installing missing ruby gems...\n"
+	log "Installing missing Ruby gems...\n"
 	debug "Running bundle install\n"
-    su - $OM_USER -c "cd \"${OM_INSTALL_DIR}/om-server\" && bundle install"
+    su - $OM_USER -c "cd \"${OM_INSTALL_DIR}/om-server\" && bundle install >> /dev/null 2>&1"
+    if [ $? -gt 0 ] ; then
+	    log-red "Failed to execute bundle install!\n"
+	fi
 }

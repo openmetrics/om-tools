@@ -83,7 +83,7 @@ fi
 prepareUserAccount
 
 if installServer ; then
-    log-green "Installation of openmetrics server finished successfully!\n"
+    log-green "Installation of Openmetrics server finished successfully!\n"
 fi
 
 exit 0
