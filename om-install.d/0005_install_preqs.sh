@@ -18,8 +18,8 @@ function debian_preqs_install {
     # suggest package to install
     if [ ! -z "${missing_tools[*]}" ] ; then
         local suggested_pkgs pkg_name tool command
-        local tool
         spinner $!
+        local tool
         for tool in ${missing_tools[@]} ; do
             # try to find package with dpkg
             if dpkg-query -S "*bin/${tool}" >> /dev/null 2>&1 ; then
@@ -28,14 +28,21 @@ function debian_preqs_install {
                 debug "Suggesting to install package ${pkg_name} for tool ${tool}\n"
                 suggested_pkgs+=("${pkg_name}")
             else
-                log-red "Couldn't find package suggestion for $tool\n"
+                log "Couldn't find package suggestion for $tool\n"
+                unresolvable_tools+=("${tool}")
             fi
         done
     fi
 
+    # better quit if there are any tools not installed yet
+	if [ ${#unresolvable_tools[@]} -gt 0 ] ; then
+	    log-red "Sorry, but I can't find suitable packages for: ${unresolvable_tools[*]}! Please install these tools to \$PATH and rerun this script afterwards.\n"
+	    return 1
+	fi
+
     # prepare command
     command=":" # bash noop
-    if [ ! -z "${suggested_pkgs[*]}" ] ; then
+    if [ ${#suggested_pkgs[@]} -gt 0 ] ; then
         debug "Suggested packages to install: ${suggested_pkgs[@]}\n"
         if [[ $_V -eq 0 ]]; then
             command="apt-get --quiet -y install ${suggested_pkgs[@]}"
@@ -65,8 +72,9 @@ function redhat_preqs_install {
 
     # suggest package to install
     if [ ! -z "${missing_tools[*]}" ] ; then
-        local suggested_pkgs pkg_full pkg_name tool command
+        local suggested_pkgs pkg_full pkg_name command
         spinner $!
+        local tool
         for tool in ${missing_tools[@]} ; do
             # try to find package with rpm
             if yum --quiet whatprovides $tool >> /dev/null 2>&1 ; then
@@ -76,10 +84,17 @@ function redhat_preqs_install {
                 debug "Suggesting to install package ${pkg_name} ${pkg_full} for tool ${tool}\n"
                 suggested_pkgs+=("${pkg_name}")
             else
-                log-red "Couldn't find package suggestion for $tool\n"
+                log "Couldn't find package suggestion for $tool\n"
+                unresolvable_tools+=("${tool}")
             fi
         done
     fi
+
+    # better quit if there are any tools not installed yet
+	if [ ${#unresolvable_tools[@]} -gt 0 ] ; then
+	    log-red "Sorry, but I can't find suitable packages for: ${unresolvable_tools[*]}! Please install these tools to \$PATH and rerun this script afterwards.\n"
+	    return 1
+	fi
 
     # prepare command
     command=":" # bash noop
