@@ -150,7 +150,7 @@ function installPreqs {
 	esac
 
     # rvm install
-    log "I'm installing Ruby by rvm now..."
+    log "I'm installing Ruby by rvm now...\n"
     curl -sSL https://get.rvm.io | bash
 
 }
@@ -169,6 +169,7 @@ function prepareUserAccount() {
 
         if $dialogAddUser ; then
             read -p "username: [$OM_USER]: "; evalInput OM_USER
+            export OM_USER
             log "Creating a new user with username '${OM_USER}'...\n"
             if ERROR=$( useradd -c "Openmetrics system user" -m -s /bin/bash --user-group ${OM_USER} 2>&1 ) ; then
                 : #noop
@@ -178,10 +179,6 @@ function prepareUserAccount() {
             fi
         fi
     fi
-
-    # rvm installer says one should to add the user to group rvm
-    # dunno if needed or not
-    usermod -G rvm om
 
     log "Checking user '${OM_USER}' for usable SSH keypair...\n"
     if su - $OM_USER -c "test -f \$HOME/.ssh/id_rsa_om" ; then

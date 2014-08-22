@@ -80,6 +80,8 @@ if ! checkPreqs ; then
     installPreqs
 fi
 
+log-green "Prerequisits seem satisfied!\n"
+
 prepareUserAccount
 
 if installServer ; then
