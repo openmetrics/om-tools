@@ -8,6 +8,11 @@ function writeConfig() {
         echo "export ${var}=\"${value}\"" >> "${TEMPDIR}/instance.env"
     done
 
+    # write om ssh pub key to instance.env
+    if su - $OM_USER -c "touch ~/.ssh/id_rsa_om.pub" ; then
+        OM_SSH_KEY=`su - $OM_USER -c "cat .ssh/id_rsa_om.pub"`
+        echo "OM_SSH_KEY=\"${OM_SSH_KEY}\"" >> "${TEMPDIR}/instance.env"
+    fi
 
     #
     # apply config
