@@ -5,7 +5,7 @@
 
 # resolve all occurances of $OM_* from infile and substitute with their value
 # argument #1 should be the name of infile w/o .in file extension, e.g. collectd.conf
-function env2conf () {
+function env2conf() {
     conffile=$1
 	env_vars="`env | grep -e '^OM_'`"
 	find ${OM_BASE_DIR}/config/ -type f -iname "${conffile}.in" | while read infile

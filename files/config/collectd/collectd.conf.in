@@ -4,10 +4,9 @@
 
 # hosts fqdn will be determined by gethostname() by default
 FQDNLookup true
-BaseDir "$OM_BASE_DIR/var/collectd"
+BaseDir "$OM_BASE_DIR/data/collectd"
 #PluginDir "$OM_BASE_DIR/lib/collectd"
-TypesDB "$OM_BASE_DIR/config/collectd/types.db"
-#TypesDB "$OM_BASE_DIR/config/collectd/types.db" "$OM_BASE_DIR/config/collectd/om_types.db"
+TypesDB "$OM_BASE_DIR/config/collectd/types.db" #"$OM_BASE_DIR/config/collectd/om_types.db"
 ReadThreads 10
 
 # send metrics every 60 seconds
@@ -27,14 +26,33 @@ LoadPlugin network
 LoadPlugin logfile
 <Plugin "logfile">
   LogLevel "info"
-  File "$OM_BASE_DIR/log/collectd/collectd.log"
+  File "$OM_BASE_DIR/logs/collectd/collectd.log"
   Timestamp true
   PrintSeverity true
 </Plugin>
+
+
+LoadPlugin unixsock
+<Plugin unixsock>
+  SocketFile "$OM_BASE_DIR/run/collectd/collectd-socket"
+  SocketGroup "$OM_USER"
+  SocketPerms "0770"
+  DeleteSocket true
+</Plugin>
+
+
+LoadPlugin rrdtool
+<Plugin "rrdtool">
+  DataDir "$OM_BASE_DIR/data/collectd/rrd"
+  CacheFlush 120
+  WritesPerSecond 50
+</Plugin>
+
+
 
 
 Include "$OM_BASE_DIR/config/collectd/filters.conf"
 Include "$OM_BASE_DIR/config/collectd/thresholds.conf"
 
 # load plugin configuration
-Include "$OM_BASE_DIR/config/collectd/plugins.d/*.conf"
+#Include "$OM_BASE_DIR/config/collectd/plugins.d/*.conf"
