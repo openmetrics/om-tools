@@ -41,6 +41,15 @@ LoadPlugin unixsock
 </Plugin>
 
 
+LoadPlugin rrdtool
+<Plugin "rrdtool">
+  DataDir "$OM_BASE_DIR/data/collectd/rrd"
+  CacheFlush 120
+  WritesPerSecond 50
+</Plugin>
+
+
+
 
 Include "$OM_BASE_DIR/config/collectd/filters.conf"
 Include "$OM_BASE_DIR/config/collectd/thresholds.conf"
