@@ -32,6 +32,16 @@ LoadPlugin logfile
 </Plugin>
 
 
+LoadPlugin unixsock
+<Plugin unixsock>
+  SocketFile "$OM_BASE_DIR/run/collectd/collectd-socket"
+  SocketGroup "$OM_USER"
+  SocketPerms "0770"
+  DeleteSocket true
+</Plugin>
+
+
+
 Include "$OM_BASE_DIR/config/collectd/filters.conf"
 Include "$OM_BASE_DIR/config/collectd/thresholds.conf"
 
