@@ -27,6 +27,15 @@ fi
 
 # read in some defaults
 . "${SELF_LOCATION}/om-install.d/defaults.env"
+. "${SELF_LOCATION}/om-install.d/functions.env"
+
+
+# read in om-server configuration (instance.env)
+
+if [ -f "/opt/openmetrics/config/instance.env" ] ; then
+    . /opt/openmetrics/config/instance.env
+    env | grep -e '^OM_'
+fi
 
 # dialog defaults
 dialogAddUser="YES"
@@ -41,6 +50,9 @@ TMPDIR_E=`echo ${TMPDIR} | sed -e 's/.*om-agent-install\(.*\)/\1/'`
 #mkdir ${TMPDIR}
 #echo "TMPDIR is set to $TMPDIR"
 LOGFILE="${TMPDIR}/install.log"
+
+# some options to get ssh/scp/svn working for remote access
+SSH_OPTIONS="-i ${HOME}/.ssh/id_rsa_om -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
 # FIXME use getopts and check arguments more acurate
 if [ -z "$2" ] ;then
@@ -92,9 +104,6 @@ function checkInput() {
 	fi
 }
 # end checkInput
-
-# some options to get ssh/scp/svn working for remote access
-SSH_OPTIONS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
 # check ssh connectivity for remote host, first with pubkey auth...
 echo -e -n "Checking passwordless SSH connectivity for host ${HOST}... "
