@@ -6,7 +6,7 @@
 FQDNLookup true
 BaseDir "${OM_BASE_DIR}/var/collectd"
 #PluginDir "${OM_BASE_DIR}/lib/collectd"
-TypesDB "${OM_BASE_DIR}/config/collectd/types.db" "${OM_BASE_DIR}/config/collectd/ps_types.db"
+TypesDB "${OM_BASE_DIR}/config/collectd/types.db" #"${OM_BASE_DIR}/config/collectd/om_types.db"
 ReadThreads 10
 
 # send metrics every 60 seconds
@@ -26,7 +26,7 @@ LoadPlugin network
 LoadPlugin logfile
 <Plugin "logfile">
   LogLevel "info"
-  File "${OM_BASE_DIR}/log/collectd/collectd.log"
+  File "${OM_BASE_DIR}/logs/collectd/collectd.log"
   Timestamp true
   PrintSeverity true
 </Plugin>
