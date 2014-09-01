@@ -5,7 +5,7 @@ function installServer() {
 	log "Creating directory structure...\n"
 	mkdir -p "${OM_BASE_DIR}" && chown -R ${OM_USER} "${OM_BASE_DIR}"
 	su - $OM_USER -c "mkdir -p ${OM_BASE_DIR}/config/collectd ${OM_BASE_DIR}/config/nginx"
-    su - $OM_USER -c "mkdir -p ${OM_BASE_DIR}/data ${OM_BASE_DIR}/data/collectd"
+    su - $OM_USER -c "mkdir -p ${OM_BASE_DIR}/data ${OM_BASE_DIR}/data/collectd ${OM_BASE_DIR}/data/collectd/html ${OM_BASE_DIR}/data/rrd"
 	su - $OM_USER -c "mkdir -p ${OM_BASE_DIR}/htdocs"
 	su - $OM_USER -c "mkdir -p ${OM_BASE_DIR}/logs/nginx ${OM_BASE_DIR}/logs/collectd"
 	#su - $OM_USER -c "mkdir -p ${OM_BASE_DIR}/om-server"

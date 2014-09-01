@@ -41,7 +41,7 @@ use Fatal qw(open close);
 use File::Basename;
 use Getopt::Long qw(:config no_ignore_case bundling pass_through);
 
-my $DIR       = "/var/lib/collectd";
+my $DIR       = "/opt/openmetrics/data/collectd";
 my $HOST      = undef;
 my $IMG_FMT   = "PNG";
 my $RECURSIVE = 1;
@@ -67,8 +67,8 @@ my @tmp = `/bin/hostname -f`; chomp(@tmp);
 $HOST = $tmp[0] if (! defined $HOST);
 my $svg_p = ($IMG_FMT eq "SVG");
 my $IMG_SFX = $svg_p ? ".svg" : ".png";
-my $IMG_DIR = "${HOST}.dir";
-my $HTML = "${HOST}.xhtml";
+my $IMG_DIR = "/opt/openmetrics/data/collectd/html/${HOST}.dir";
+my $HTML = "/opt/openmetrics/data/collectd/html/${HOST}.xhtml";
 
 ################################################################################
 #
