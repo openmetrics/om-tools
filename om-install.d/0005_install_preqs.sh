@@ -3,6 +3,7 @@
 function debian_preqs_install {
 
     # TODO install recent postgres
+    # TODO link librrd.so: ln -s /usr/lib/librrd.so.4 /usr/lib/librrd.so
     # echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main" | sudo tee -a /etc/apt/sources.list
     # wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
     # sudo apt-get update
