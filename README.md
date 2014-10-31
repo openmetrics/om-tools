@@ -8,6 +8,8 @@ Run this script to install openmetrics server on localhost:
 cd /tmp
 git clone https://github.com/openmetrics/om-tools.git
 cd om-tools
+git submodule init
+git submodule update
 bash ./om-install.sh
 ```
 
