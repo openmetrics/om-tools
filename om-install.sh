@@ -29,8 +29,8 @@ fi
 
 
 # some defaults
-source "${SELF_LOCATION}/om-install.d/defaults.env"
 source "${SELF_LOCATION}/om-install.d/functions.env"
+source "${SELF_LOCATION}/om-install.d/defaults.env"
 
 # read in other globals & functions
 for f in ${SELF_LOCATION}/om-install.d/*.sh; do source $f; done
