@@ -1,0 +1,6 @@
+[submodule "lib/ohai-plugins"]
+	path = lib/ohai-plugins
+	url = git@github.com:rackerlabs/ohai-plugins.git
+[submodule "lib/ohai"]
+	path = lib/ohai
+	url = git@github.com:opscode/ohai.git
