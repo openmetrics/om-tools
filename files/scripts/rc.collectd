@@ -23,7 +23,7 @@ fi
 
 # pidfile
 PIDFILE="${OM_BASE_DIR}/run/collectd/collectd.pid"
-if [ -f ${CATALINA_PID} ] ; then
+if [ -f ${PIDFILE} ] ; then
 	pid=`cat ${PIDFILE}`
 fi
 
