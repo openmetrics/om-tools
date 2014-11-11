@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 
 # source in environment and functions
@@ -21,23 +21,28 @@ else
         exit 42
 fi
 
-
+# pidfile
+PIDFILE="${OM_BASE_DIR}/run/collectd/collectd.pid"
+if [ -f ${CATALINA_PID} ] ; then
+	pid=`cat ${PIDFILE}`
+fi
 
 case "$1" in
-
-	# collectd options
-	# -c configfile
-
 	"start")
 		echo "Starting collectd... "
 		env2conf collectd.conf
-		${COLLECTD} -C ${OM_BASE_DIR}/config/collectd/collectd.conf -P ${OM_BASE_DIR}/run/collectd/collectd.pid
+		${COLLECTD} -C ${OM_BASE_DIR}/config/collectd/collectd.conf -P ${PIDFILE}
 	;;
 
 	"stop")
-		echo -n "Stopping collectd... "
-        echo "TODO"
-        exit 42
+		if [ -n "$pid" ] ; then
+			echo -n "Stopping collectd... "
+                        kill -TERM "$pid"
+                	echo "Done"
+	
+        	else
+          		echo "no running process found" >&2
+        	fi
 	;;
 
 	"restart")
