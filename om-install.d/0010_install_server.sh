@@ -28,8 +28,8 @@ function installServer() {
     usermod -G rvm "${OM_USER}"
 
     # TODO make less noisy
-    su - $OM_USER -c "source /etc/profile.d/rvm.sh && rvm get stable"
-    su - $OM_USER -c "rvm install 2.1.1 --disable-binary && rvm use 2.1.1"
+    #su - $OM_USER -c "source /etc/profile.d/rvm.sh && rvm get stable"
+    #su - $OM_USER -c "rvm install 2.1.1 --disable-binary && rvm use 2.1.1"
     # TODO run gem install foreman
     su - $OM_USER -c "cd \"${OM_BASE_DIR}/om-server\" && bundle install --without development test >> /dev/null"
     if [ $? -gt 0 ] ; then
