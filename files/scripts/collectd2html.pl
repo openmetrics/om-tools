@@ -14,7 +14,7 @@
 #   containing all necessary images.
 #
 #
-# Copyright 2006 Vincent Stehlé <vincent.stehle@free.fr>
+# Copyright 2006 Vincent Stehlï¿½ <vincent.stehle@free.fr>
 #
 # Patch to configure the data directory and hostname by Eddy Petrisor
 # <eddy.petrisor@gmail.com>.
@@ -221,7 +221,7 @@ END
 		my $img = "$IMG_DIR/${bn}-$span$IMG_SFX";
 
 		my $cmd = "rrdtool graph $img"
-			." -t \"$bn $span\" --imgformat $IMG_FMT --width 600 --height 100"
+			." -t \"$bn $span\" --imgformat $IMG_FMT --width 570 --height 95"
 			." --start now-$span --end now --interlaced"
 			." $defs >/dev/null 2>&1";
 		system($cmd);
