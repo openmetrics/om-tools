@@ -71,6 +71,7 @@ function debian_preqs_install {
 
 function redhat_preqs_install {
 
+# TODO link librrd.so: ln -s /usr/lib64/librrd.so.4 /usr/lib64/librrd.so
 #https://wiki.postgresql.org/wiki/YUM_Installation#Configure_your_YUM_repository
 #http://yum.postgresql.org/repopackages.php#pg93
 
