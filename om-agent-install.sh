@@ -58,7 +58,7 @@ while getopts ":vh" Option ; do
 	case $Option in
 	    v) _V=1 ;;
 	    h) print_usage; exit 0;;
-		* ) log-red "Invalid option!\n"; print_usage; exit 42;;
+		* ) log_red "Invalid option!\n"; print_usage; exit 42;;
 	esac
 done
 shift $(($OPTIND - 1)) # Decrements the argument pointer so it points to next argument.
@@ -95,7 +95,7 @@ if [ -f "/opt/openmetrics/config/instance.env" ] ; then
 	fi
 else
 	log "FAILED\n"
-	log-red "Could not load /opt/openmetrics/config/instance.env\n"
+	log_red "Could not load /opt/openmetrics/config/instance.env\n"
 	exit 42
 fi
 

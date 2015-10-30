@@ -37,7 +37,7 @@ function debian_preqs_install {
 
     # better quit if there are any tools not installed yet
 	if [ ${#unresolvable_tools[@]} -gt 0 ] ; then
-	    log-red "Sorry, but I can't find suitable packages for: ${unresolvable_tools[*]}! Please install these tools to \$PATH and rerun this script afterwards.\n"
+	    log_red "Sorry, but I can't find suitable packages for: ${unresolvable_tools[*]}! Please install these tools to \$PATH and rerun this script afterwards.\n"
 	    return 1
 	fi
 
@@ -54,7 +54,7 @@ function debian_preqs_install {
 
     if [ ! "${command}" = ":" ] ; then
         log "Based on missing packages, I will issue this command for you now:"
-        log-cyan "\n\t${command}\n"
+        log_cyan "\n\t${command}\n"
 
         while true; do
             read -p "Is this ok for you? [$dialogAcceptSuggest]: "; evalYesNo dialogAcceptSuggest
@@ -97,7 +97,7 @@ function redhat_preqs_install {
 
     # better quit if there are any tools not installed yet
 	if [ ${#unresolvable_tools[@]} -gt 0 ] ; then
-	    log-red "Sorry, but I can't find suitable packages for: ${unresolvable_tools[*]}! Please install these tools to \$PATH and rerun this script afterwards.\n"
+	    log_red "Sorry, but I can't find suitable packages for: ${unresolvable_tools[*]}! Please install these tools to \$PATH and rerun this script afterwards.\n"
 	    return 1
 	fi
 
@@ -113,7 +113,7 @@ function redhat_preqs_install {
     fi
 
     log "Based on missing packages, I will issue this command for you now:"
-    log-cyan "\n\t${command}\n"
+    log_cyan "\n\t${command}\n"
 
     while true; do
         read -p "Is this ok for you? [$dialogAcceptSuggest]: "; evalYesNo dialogAcceptSuggest
@@ -147,7 +147,7 @@ function installPreqs {
 				redhat_preqs_install
 				;;
 			*)
-				log-red "Unsupported distribution. Sorry.\n"
+				log_red "Unsupported distribution. Sorry.\n"
 				exit 42
 	esac
 
@@ -164,7 +164,7 @@ function prepareUserAccount() {
         log "User '${OM_USER}' already exists on this system. Using it...\n"
     else
         # preferred user account does not exist, ask to create it
-        log-red "User account '${OM_USER}' does not exist on this system.\n"
+        log_red "User account '${OM_USER}' does not exist on this system.\n"
         while true ; do
             read -p "Do you want me to create a new user on this host? [$dialogAddUser]: "; evalYesNo dialogAddUser
         done
@@ -176,7 +176,7 @@ function prepareUserAccount() {
             if ERROR=$( useradd -c "Openmetrics system user" -m -s /bin/bash --user-group ${OM_USER} 2>&1 ) ; then
                 : #noop
             else
-                log-red "${ERROR}"
+                log_red "${ERROR}"
                 exit 42
             fi
         fi
@@ -190,7 +190,7 @@ function prepareUserAccount() {
         if su - ${OM_USER} -c "ssh-keygen -q -t rsa -b 2048 -f \$HOME/.ssh/id_rsa_om -P '' " ; then
             debug "Successfully created SSH keypair for '${OM_USER}'...\n"
         else
-            log-red "Failed to generate SSH keypair\n"
+            log_red "Failed to generate SSH keypair\n"
             exit 42
         fi
     fi

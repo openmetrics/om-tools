@@ -34,7 +34,7 @@ function checkPreqs {
 	# some tools are missing, try to install
 	if [ $ret = 1 ] ; then
 	    #echo "Missing tools: ${missing_tools[*]}"
-		log-red "Oh snap! This system lacks software needed to install Openmetrics: ${missing_tools[*]}\n"
+		log_red "Oh snap! This system lacks software needed to install Openmetrics: ${missing_tools[*]}\n"
 		while true; do
 		    read -p "I'll try to fix this for you. Ok? [$dialogInstallPreqs]: "; evalYesNo dialogInstallPreqs
         done
@@ -43,7 +43,7 @@ function checkPreqs {
 
 	# install dir already exists? better quit...
     test -d "${OM_BASE_DIR}" &&
-    log-red "Apparently there already exists an Openmetrics installation in '${OM_BASE_DIR}'\n" &&
+    log_red "Apparently there already exists an Openmetrics installation in '${OM_BASE_DIR}'\n" &&
     log "You may want to run '${SELF_LOCATION}/om-update.sh' instead.\n" &&
     exit 42
 

@@ -17,7 +17,7 @@ function installServer() {
 	debug "Using this git clone command: ${OM_GIT_CMD}\n"
 	su - $OM_USER -c "cd \"${OM_BASE_DIR}\" && ${OM_GIT_CMD} om-server >> /dev/null 2>&1" # checks out selected branch to dir om-server
 	if [ $? -gt 0 ] ; then
-	    log-red "Failed to execute ${OM_GIT_CMD}!\n"
+	    log_red "Failed to execute ${OM_GIT_CMD}!\n"
 	    exit 1
 	fi
 
@@ -33,7 +33,7 @@ function installServer() {
     # TODO run gem install foreman
     su - $OM_USER -c "cd \"${OM_BASE_DIR}/om-server\" && bundle install --without development test >> /dev/null"
     if [ $? -gt 0 ] ; then
-	    log-red "Failed to execute bundle install!\n"
+	    log_red "Failed to execute bundle install!\n"
 	    # run bundle again to fetch full error output
 	    if [[ $_V -eq 1 ]]; then
             su - $OM_USER -c "cd \"${OM_BASE_DIR}/om-server\" && bundle install"

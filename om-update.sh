@@ -55,14 +55,14 @@ while getopts ":vh" Option ; do
 	case $Option in
 	    v) _V=1 ;;
 	    h) print_usage; exit 0;;
-		* ) log-red "Invalid option!\n"; print_usage; exit 42;;
+		* ) log_red "Invalid option!\n"; print_usage; exit 42;;
 	esac
 done
 shift $(($OPTIND - 1)) # Decrements the argument pointer so it points to next argument.
 
 # we should be root to proceed
 if [ "$UID" != "0" ]  ; then
-	log-red "Run me with root privileges! Exiting.\n"
+	log_red "Run me with root privileges! Exiting.\n"
 	exit 42
 fi
 
@@ -73,7 +73,7 @@ systemInfo
 checkPreqs
 
 if updateServer ; then
-    log-green "Openmetrics server update finished successfully!\n"
+    log_green "Openmetrics server update finished successfully!\n"
 fi
 
 exit 0
