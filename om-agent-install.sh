@@ -88,8 +88,11 @@ echo -n "Looking for openmetrics server configuration... "
 if [ -f "/opt/openmetrics/config/instance.env" ] ; then
 	. /opt/openmetrics/config/instance.env
 	echo "OK" 
-	debug "I will use these settings for agent installation:\n"
-	debug env | grep -e '^OM_' | grep -v -e '^OM_DB' | grep -v 'OM_USER' | sort
+
+	if [[ $_V -eq 1 ]] ; then
+		echo "I will use these settings for agent installation:"
+		env | grep -e '^OM_' | grep -v -e '^OM_DB' | grep -v 'OM_USER' | sort
+	fi
 else
 	log "FAILED\n"
 	log-red "Could not load /opt/openmetrics/config/instance.env\n"
