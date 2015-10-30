@@ -20,6 +20,7 @@ Interval 60
 LoadPlugin network
 <Plugin network>
 	Listen "$OM_HOSTNAME" "25826"
+	MaxPacketSize 65535
 </Plugin>
 
 
