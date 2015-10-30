@@ -128,7 +128,15 @@ function prepareInstall() {
 
 function installAgent() {
 	echo -e -n "Starting installation (this may take a while)... "
-	if scp -q ${SSH_OPTIONS} -r ${TMPDIR} root@${HOST}:/tmp && ssh -q ${SSH_OPTIONS} root@${HOST} "sh /tmp/om-agent-install${TMPDIR_E}/installOMAgent.sh" ; then
+	# transfer files
+	if scp -q ${SSH_OPTIONS} -r ${TMPDIR} root@${HOST}:/tmp 
+		:
+	else
+		log_red "Failed to transfer install files"
+		exit 42
+	fi
+	# execute installation
+	ssh -q ${SSH_OPTIONS} root@${HOST} "/tmp/om-agent-install${TMPDIR_E}/installOMAgent.sh" ; then
 		log_green "Installation succeeded!\n"
 	else 
 		log_red "FAILED\n"
@@ -165,6 +173,9 @@ if ` ssh -q -q -o BatchMode=yes -o ConnectTimeout=3 ${SSH_OPTIONS} root@${HOST} 
 	if [[ $_V -eq 1 ]] ; then
 		echo "_V=1" >> ${TMPDIR}/installOMAgent.sh	
 	fi
+
+	# set executable
+	chmod +x ${TMPDIR}/installOMAgent.sh
 
 	# create user on remote host
 	read -p "Do you want me to create a new user on remote host? [$dialogAddUser]: "; checkInput dialogAddUser
