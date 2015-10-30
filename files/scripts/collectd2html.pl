@@ -216,11 +216,11 @@ for (my $i = 0; $i < scalar(@rrds); ++$i) {
 END
 
 	# graph various ranges
-	foreach my $span qw(1hour 1day 1week 1month){
+	foreach my $span (qw(1hour 1day 1week 1month)) {
 		system("mkdir -p $IMG_DIR/" . dirname($bn));
 		my $img = "$IMG_DIR/${bn}-$span$IMG_SFX";
 
-		my $cmd = "rrdtool graph $img"
+		$cmd = "rrdtool graph $img"
 			." -t \"$bn $span\" --imgformat $IMG_FMT --width 570 --height 95"
 			." --start now-$span --end now --interlaced"
 			." $defs >/dev/null 2>&1";
