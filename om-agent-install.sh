@@ -187,7 +187,7 @@ EOF
 
 	# continue install procedure itself
 	cat >> ${TMPDIR}/installOMAgent.sh << EOF
-if [ -d "${OM_AGENT_DIR}" ]; then log_error "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
+if [ -d "${OM_AGENT_DIR}" ]; then log_red "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
 
 # get system info (prints in debug only)
 systemInfo
