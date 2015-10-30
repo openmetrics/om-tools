@@ -160,9 +160,13 @@ END
 
 foreach my $bn (@rrds){
 	my $cleaned_bn = $bn;
-	$cleaned_bn =~ tr/%\//__/;
+	my $encoded_bn = $bn;
+	$cleaned_bn =~ tr/%\//__/; 
+	$cleaned_bn =~ s/ /+/g; 
+	$cleaned_bn =~ s/&/&amp;/g; 
+	$encoded_bn =~ s/&/&amp;/g; # convert ampersand
 	print OUT <<END;
-<a href="#$cleaned_bn">$bn</a>
+<a href="#$cleaned_bn">$encoded_bn</a>
 END
 }
 
@@ -176,7 +180,7 @@ for (my $i = 0; $i < scalar(@rrds); ++$i) {
 	print "$bn\n";
 
 	my $rrd = $list[$i];
-	my $cmd = "rrdtool info $rrd |grep 'ds\\[' |sed 's/^ds\\[//'" 
+	my $cmd = "rrdtool info \"${rrd}\" |grep 'ds\\[' |sed 's/^ds\\[//'" 
 		." |sed 's/\\].*//' |sort |uniq";
 	my @dss = `$cmd`; chomp(@dss);
 
@@ -185,8 +189,9 @@ for (my $i = 0; $i < scalar(@rrds); ++$i) {
 	my $defs = "";
 
 	foreach my $ds (@dss){
-		$defs .= " DEF:${ds}_avg=$rrd:$ds:AVERAGE"
-			." DEF:${ds}_max=$rrd:$ds:MAX ";
+
+		$defs .= " DEF:${ds}_avg=\"${rrd}\":$ds:AVERAGE"
+			." DEF:${ds}_max=\"${rrd}\":$ds:MAX ";
 	}
 
 	# all AREA
@@ -210,31 +215,40 @@ for (my $i = 0; $i < scalar(@rrds); ++$i) {
 	}
 
 	my $cleaned_bn = $bn;
-	$cleaned_bn =~ tr/%\//__/;
+        my $encoded_bn = $bn;
+        $cleaned_bn =~ tr/%\//__/;
+        $cleaned_bn =~ s/ /+/g; 
+        $cleaned_bn =~ s/&/&amp;/g; 
+        $encoded_bn =~ s/&/&amp;/g; # convert ampersand
+
 	print OUT <<END;
-<h2><a id="$cleaned_bn">$bn</a></h2>
+<h2><a id="$cleaned_bn">$encoded_bn</a></h2>
 END
 
 	# graph various ranges
 	foreach my $span (qw(1hour 1day 1week 1month)) {
-		system("mkdir -p $IMG_DIR/" . dirname($bn));
+		my $hostdir = dirname($bn);
+		system("mkdir -p \"$IMG_DIR/${hostdir}\"");
 		my $img = "$IMG_DIR/${bn}-$span$IMG_SFX";
 
-		$cmd = "rrdtool graph $img"
+		$cmd = "rrdtool graph \"${img}\""
 			." -t \"$bn $span\" --imgformat $IMG_FMT --width 570 --height 95"
 			." --start now-$span --end now --interlaced"
 			." $defs >/dev/null 2>&1";
 		system($cmd);
 
-		my $cleaned_img = $img; $cleaned_img =~ s/%/%25/g;
+		my $cleaned_img = $img; 
+		$cleaned_img =~ s/%/%25/g;
+		$cleaned_img =~ s/ /+/g;
+        	$cleaned_img =~ s/&/&amp;/g;
 		if (! $svg_p) {
 			print OUT <<END;
-<p class="graph"><img src="$cleaned_img" alt="${bn} $span" /></p>
+<p class="graph"><img src="$cleaned_img" alt="${encoded_bn} $span" /></p>
 END
 		} else {
 			print OUT <<END;
 <p class="graph"><object data="$cleaned_img" type="image/svg+xml">
-  ${bn} $span</object></p>
+  ${encoded_bn} $span</object></p>
 END
 		}
 	}
