@@ -129,9 +129,9 @@ function prepareInstall() {
 function installAgent() {
 	echo -e -n "Starting installation (this may take a while)... "
 	if scp -q ${SSH_OPTIONS} -r ${TMPDIR} root@${HOST}:/tmp && ssh -q ${SSH_OPTIONS} root@${HOST} "sh /tmp/om-agent-install${TMPDIR_E}/installOMAgent.sh" ; then
-		echo "DONE"
+		log_green "Installation succeeded!\n"
 	else 
-		echo "FAILED"
+		log_red "FAILED\n"
 		exit 42
 	fi
 } 
@@ -187,25 +187,25 @@ EOF
 
 	# continue install procedure itself
 	cat >> ${TMPDIR}/installOMAgent.sh << EOF
-if [ -d "${OM_AGENT_DIR}" ]; then echo "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
+if [ -d "${OM_AGENT_DIR}" ]; then log_error "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
 
-# print system info (debug only)
+# get system info (prints in debug only)
 systemInfo
 
 # DistroBasedOn comes from appended functions.env
-if [[ "$DistroBasedOn" == "RedHat" ]] ; then
+if [[ "\$DistroBasedOn" == "redhat" ]] ; then
 	# redhat install
 	yum -y install collectd >> /dev/null 2>&1
 	systemctl stop collectd >> /dev/null 2>&1
 	systemctl disable collectd >> /dev/null 2>&1
-elif [[ "$DistroBasedOn" == "Debian" ]] ; then
+elif [[ "\$DistroBasedOn" == "debian" ]] ; then
 	# debian install
 	# install collectd
 	apt-get -y install collectd >> /dev/null 2>&1
 	/etc/init.d/collectd stop >> /dev/null 2>&1
 	update-rc.d -f collectd remove >> /dev/null 2>&1
 else
-	echo "ERROR Unsupported target operating system: $DistroBasedOn"
+	log_red "ERROR Unsupported target operating system: $DistroBasedOn"
 	exit 42
 fi
 
