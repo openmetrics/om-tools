@@ -131,8 +131,8 @@ if ` ssh -q -q -o BatchMode=yes -o ConnectTimeout=3 ${SSH_OPTIONS} root@${HOST} 
 	if [ $dialogAddUser = "YES" ] ; then
 		read -p "Username? [$OM_USER]: "; checkInput OM_USER
 		cat > ${TMPDIR}/installOMAgent.sh << EOF
-#!/bin/sh
-useradd -c "OpenMetrics agent" -m -s /bin/bash --user-group ${OM_USER}
+#!/bin/bash
+useradd -c "openmetrics agent" -m -s /bin/bash --user-group ${OM_USER}
 # deploy om server ssh public key
 su - $OM_USER -c "umask 077; mkdir ~/.ssh && touch ~/.ssh/authorized_keys && echo "${OM_SSH_KEY}" >> ~/.ssh/authorized_keys"
 EOF
@@ -144,12 +144,33 @@ EOF
 	
 	#FIXME OM_INSTALL_DIR  should match do users home directory?
 	read -p "Which directory should be used to install the OpenMetrics agent? [$OM_AGENT_DIR]: "; checkInput OM_AGENT_DIR
+
+	# append functions to installer to figure out the os
+	cat "${SELF_LOCATION}/om-install.d/functions.env" >> ${TMPDIR}/installOMAgent.sh
+
+	# the install procedure itself
 	cat >> ${TMPDIR}/installOMAgent.sh << EOF
 if [ -d "${OM_AGENT_DIR}" ]; then echo "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
-# install collectd
-apt-get -y install collectd >> /dev/null 2>&1
-/etc/init.d/collectd stop >> /dev/null 2>&1
-update-rc.d -f collectd remove >> /dev/null 2>&1
+
+# print system info
+systemInfo
+
+if [[ "$DistroBasedOn" == "RedHat" ]] ; then
+	# redhat install
+	yum -y install collectd >> /dev/null 2>&1
+	systemctl stop collectd >> /dev/null 2>&1
+	systemctl disable collectd >> /dev/null 2>&1
+elif [[ "$DistroBasedOn" == "Debian" ]] ; then
+	# debian install
+	# install collectd
+	apt-get -y install collectd >> /dev/null 2>&1
+	/etc/init.d/collectd stop >> /dev/null 2>&1
+	update-rc.d -f collectd remove >> /dev/null 2>&1
+else
+	echo "ERROR Unsupported target operating system: $DistroBasedOn"
+	exit 42
+fi
+
 mkdir -p "${OM_AGENT_DIR}"
 # this move doesnt include .git directory
 cp -r /tmp/om-agent-install${TMPDIR_E}/om-agent/* ${OM_AGENT_DIR}/
@@ -163,8 +184,8 @@ chown $OM_USER "${OM_AGENT_DIR}/om-agent.env"
 su - $OM_USER -c "${OM_AGENT_DIR}/scripts/rc.collectd start >> /dev/null 2>&1"
 EOF
 	cd ${TMPDIR}
-	echo -e -n "Fetching latest version of OpenMetrics agent... "
-	if ` git clone git://github.com/mgrobelin/om-agent.git >> ${LOGFILE} 2>&1` ; then
+	echo -e -n "Fetching latest version of openmetrics agent... "
+	if ` git clone git://github.com/openmetrics/om-agent.git >> ${LOGFILE} 2>&1` ; then
 		echo "DONE"
 	else
 		echo "FAILED"
