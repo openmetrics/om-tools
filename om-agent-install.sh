@@ -36,10 +36,10 @@ fi
 # read in om-server configuration (instance.env)
 echo -n "Looking for openmetrics server configuration..."
 if [ -f "/opt/openmetrics/config/instance.env" ] ; then
-
-    . /opt/openmetrics/config/instance.env
-	echo "OK. I will use these settings for agent installation:"
-	env | grep -e '^OM_' | sort | sed -e 's/\(OM_DB_PASS=\)\(.*\)/\1<striped>/g'
+	. /opt/openmetrics/config/instance.env
+	echo "OK" 
+	echo "I will use these settings for agent installation:"
+	env | grep -e '^OM_' | grep -v -e '^OM_DB' | grep -v 'OM_USER' | sort
 else
 	echo "FAILED. Could not load /opt/openmetrics/config/instance.env"
 	exit 42
@@ -117,6 +117,15 @@ function checkInput() {
 echo -e -n "Checking passwordless SSH connectivity for host ${HOST}... "
 if ` ssh -q -q -o BatchMode=yes -o ConnectTimeout=3 ${SSH_OPTIONS} root@${HOST} ":" ` ; then 
 	echo "DONE"
+	
+	# test ssh pubkey to be available
+	if test -n "${OM_SSH_KEY}" ; then
+		echo "Using SSH public key: $OM_SSH_KEY" 
+	else
+		echo "No usable SSH public key found."
+		exit 42
+	fi
+
 	# create user on remote host
 	read -p "Do you want me to create a new user on remote host? [$dialogAddUser]: "; checkInput dialogAddUser
 	if [ $dialogAddUser = "YES" ] ; then
@@ -125,7 +134,7 @@ if ` ssh -q -q -o BatchMode=yes -o ConnectTimeout=3 ${SSH_OPTIONS} root@${HOST} 
 #!/bin/sh
 useradd -c "OpenMetrics agent" -m -s /bin/bash --user-group ${OM_USER}
 # deploy om server ssh public key
-su - $OM_USER -c "umask 077; mkdir ~/.ssh && touch ~/.ssh/authorized_keys && echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA2O08fWzrqsLf4d2w8nC9TRB0mliODq0PcksdysVfaWX95Kiqnuj/9Ua/xwhJkrk3sxM04gToZeHatdtd3WgE5+ObgIxubVxdXxofi6m6UeuI1qgl2XUGwRc37v7LJLWHHaz39KeuJu+k8ItgbYH1wRfOOGMZVLX4C3X7KUzD/G320nNDIutiklBBmhss1s+V5wrT+VOcJXqgb4hZ2KXjxo71N3blZo1pPiE6ya/8hGue8pvOE5u1gI+MP5G0ItDxiH7WIMqSlF63zJAuX475RtjZUGfGqVSQQer4/1TXKokkgmkKYpVe/fQwYoZShoncjY0Syh94P0fmHDSx1s/qGQ== om@om' >> ~/.ssh/authorized_keys"
+su - $OM_USER -c "umask 077; mkdir ~/.ssh && touch ~/.ssh/authorized_keys && echo "${OM_SSH_KEY}" >> ~/.ssh/authorized_keys"
 EOF
 
 	else
@@ -148,6 +157,7 @@ chown -R $OM_USER:$OM_USER ${OM_AGENT_DIR}
 # create env file for agent
 echo OM_AGENT_DIR=\"${OM_AGENT_DIR}\" >> "${OM_AGENT_DIR}/om-agent.env"
 echo OM_SERVER=\"${OM_SERVER}\" >> "${OM_AGENT_DIR}/om-agent.env"
+chown $OM_USER "${OM_AGENT_DIR}/om-agent.env"
 # start the agent
 # FIXME add some error handling if daemon doesn't starts
 su - $OM_USER -c "${OM_AGENT_DIR}/scripts/rc.collectd start >> /dev/null 2>&1"
