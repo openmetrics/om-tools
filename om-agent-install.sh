@@ -158,12 +158,20 @@ if ` ssh -q -q -o BatchMode=yes -o ConnectTimeout=3 ${SSH_OPTIONS} root@${HOST} 
 		exit 42
 	fi
 
+	# create install script: append common functions to installer
+	cat "${SELF_LOCATION}/om-install.d/functions.env" >> ${TMPDIR}/installOMAgent.sh
+
+	# pass through debug mode
+	if [[ $_V -eq 1 ]] ; then
+		echo "_V=1" >> ${TMPDIR}/installOMAgent.sh	
+	fi
+
 	# create user on remote host
 	read -p "Do you want me to create a new user on remote host? [$dialogAddUser]: "; checkInput dialogAddUser
 	if [ $dialogAddUser = "YES" ] ; then
 		read -p "Username? [$OM_USER]: "; checkInput OM_USER
-		cat > ${TMPDIR}/installOMAgent.sh << EOF
-#!/bin/bash
+		cat >> ${TMPDIR}/installOMAgent.sh << EOF
+# openmetrics agent install
 useradd -c "openmetrics agent" -m -s /bin/bash --user-group ${OM_USER}
 # deploy om server ssh public key
 su - $OM_USER -c "umask 077; mkdir ~/.ssh && touch ~/.ssh/authorized_keys && echo "${OM_SSH_KEY}" >> ~/.ssh/authorized_keys"
@@ -177,15 +185,7 @@ EOF
 	#FIXME OM_INSTALL_DIR  should match do users home directory?
 	read -p "Which directory should be used to install the OpenMetrics agent? [$OM_AGENT_DIR]: "; checkInput OM_AGENT_DIR
 
-	# append functions to installer to figure out the os
-	cat "${SELF_LOCATION}/om-install.d/functions.env" >> ${TMPDIR}/installOMAgent.sh
-
-	# pass through debug mode
-	if [[ $_V -eq 1 ]] ; then
-		echo "_V=1" >> ${TMPDIR}/installOMAgent.sh	
-	fi
-
-	# the install procedure itself
+	# continue install procedure itself
 	cat >> ${TMPDIR}/installOMAgent.sh << EOF
 if [ -d "${OM_AGENT_DIR}" ]; then echo "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
 
