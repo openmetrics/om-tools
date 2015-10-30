@@ -88,7 +88,7 @@ echo -n "Looking for openmetrics server configuration... "
 if [ -f "/opt/openmetrics/config/instance.env" ] ; then
 	. /opt/openmetrics/config/instance.env
 	echo "OK" 
-	debug "I will use these settings for agent installation:"
+	debug "I will use these settings for agent installation:\n"
 	debug env | grep -e '^OM_' | grep -v -e '^OM_DB' | grep -v 'OM_USER' | sort
 else
 	log "FAILED\n"
@@ -178,7 +178,7 @@ EOF
 	cat "${SELF_LOCATION}/om-install.d/functions.env" >> ${TMPDIR}/installOMAgent.sh
 
 	# pass through debug mode
-	if [ "$_V" = "1" ] ; then
+	if [[ $_V -eq 1 ]] ; then
 		echo "_V=1" >> ${TMPDIR}/installOMAgent.sh	
 	fi
 
