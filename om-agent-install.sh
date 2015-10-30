@@ -136,7 +136,7 @@ function installAgent() {
 		exit 42
 	fi
 	# execute installation
-	ssh -q ${SSH_OPTIONS} root@${HOST} "/tmp/om-agent-install${TMPDIR_E}/installOMAgent.sh" ; then
+	if ssh -q ${SSH_OPTIONS} root@${HOST} "/tmp/om-agent-install${TMPDIR_E}/installOMAgent.sh" ; then
 		log_green "Installation succeeded!\n"
 	else 
 		log_red "FAILED\n"
