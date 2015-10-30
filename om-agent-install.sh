@@ -33,21 +33,69 @@ fi
 . "${SELF_LOCATION}/om-install.d/defaults.env"
 . "${SELF_LOCATION}/om-install.d/functions.env"
 
-# read in om-server configuration (instance.env)
-echo -n "Looking for openmetrics server configuration..."
-if [ -f "/opt/openmetrics/config/instance.env" ] ; then
-	. /opt/openmetrics/config/instance.env
-	echo "OK" 
-	echo "I will use these settings for agent installation:"
-	env | grep -e '^OM_' | grep -v -e '^OM_DB' | grep -v 'OM_USER' | sort
-else
-	echo "FAILED. Could not load /opt/openmetrics/config/instance.env"
-	exit 42
-fi
 
 # dialog defaults
 dialogAddUser="YES"
 dialogPathToInstall="YES"
+
+
+#
+# help & usage
+function print_usage {
+	echo -e "Usage: `basename $0` [<Options>] openmetrics_server target_host\n"
+	echo -e "Options:"
+	echo -e "  -v\t\t\tenable verbose output"
+	echo -e "  -h\t\t\tprint this help"
+}
+
+
+# get and set opts
+#
+_V=0
+NO_ARGS=0
+OPTERROR=65
+while getopts ":vh" Option ; do
+	case $Option in
+	    v) _V=1 ;;
+	    h) print_usage; exit 0;;
+		* ) log-red "Invalid option!\n"; print_usage; exit 42;;
+	esac
+done
+shift $(($OPTIND - 1)) # Decrements the argument pointer so it points to next argument.
+
+
+# FIXME check arguments more acurate
+if [ -z "$2" ] ;then
+	print_usage
+	exit 42 
+else
+	HOST="$2"
+	export HOST 
+fi
+
+if [ -z "$1" ] ;then
+	print_usage
+	exit 42 
+else
+	OM_SERVER="$1"
+	export OM_SERVER
+fi
+
+
+
+# read in om-server configuration (instance.env)
+echo -n "Looking for openmetrics server configuration... "
+if [ -f "/opt/openmetrics/config/instance.env" ] ; then
+	. /opt/openmetrics/config/instance.env
+	echo "OK" 
+	debug "I will use these settings for agent installation:"
+	debug env | grep -e '^OM_' | grep -v -e '^OM_DB' | grep -v 'OM_USER' | sort
+else
+	log "FAILED\n"
+	log-red "Could not load /opt/openmetrics/config/instance.env\n"
+	exit 42
+fi
+
 
 
 # create temporary directory for setup files
@@ -61,25 +109,6 @@ LOGFILE="${TMPDIR}/remote-install.log"
 
 # some options to get ssh/scp/svn working for remote access
 SSH_OPTIONS="-i ${HOME}/.ssh/id_rsa_om -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-
-# FIXME use getopts and check arguments more acurate
-if [ -z "$2" ] ;then
-	echo "Usage: `basename $0` <hostname|IP address of openmetrics server> <hostname|IP address of install target>" >&2
-	exit 42 
-else
-	HOST="$2"
-	export HOST 
-fi
-
-if [ -z "$1" ] ;then
-	echo "Usage: `basename $0` <hostname|ip of OpenMetrics server> <hostname|ip of install target>" >&2
-	exit 42 
-else
-	OM_SERVER="$1"
-	export OM_SERVER
-fi
-
-
 
 
 function prepareInstall() {	
@@ -114,7 +143,7 @@ function checkInput() {
 # end checkInput
 
 # check ssh connectivity for remote host, first with pubkey auth...
-echo -e -n "Checking passwordless SSH connectivity for host ${HOST}... "
+echo -e -n "Checking passwordless SSH connectivity for root@${HOST}... "
 if ` ssh -q -q -o BatchMode=yes -o ConnectTimeout=3 ${SSH_OPTIONS} root@${HOST} ":" ` ; then 
 	echo "DONE"
 	
@@ -148,13 +177,19 @@ EOF
 	# append functions to installer to figure out the os
 	cat "${SELF_LOCATION}/om-install.d/functions.env" >> ${TMPDIR}/installOMAgent.sh
 
+	# pass through debug mode
+	if [ "$_V" = "1" ] ; then
+		echo "_V=1" >> ${TMPDIR}/installOMAgent.sh	
+	fi
+
 	# the install procedure itself
 	cat >> ${TMPDIR}/installOMAgent.sh << EOF
 if [ -d "${OM_AGENT_DIR}" ]; then echo "ERROR There already is a directory called ${OM_AGENT_DIR} in place. Aborting." && exit 42 ; fi
 
-# print system info
+# print system info (debug only)
 systemInfo
 
+# DistroBasedOn comes from appended functions.env
 if [[ "$DistroBasedOn" == "RedHat" ]] ; then
 	# redhat install
 	yum -y install collectd >> /dev/null 2>&1
