@@ -129,7 +129,7 @@ function prepareInstall() {
 function installAgent() {
 	echo -e -n "Starting installation (this may take a while)... "
 	# transfer files
-	if scp -q ${SSH_OPTIONS} -r ${TMPDIR} root@${HOST}:/tmp 
+	if scp -q ${SSH_OPTIONS} -r ${TMPDIR} root@${HOST}:/tmp ; then
 		:
 	else
 		log_red "Failed to transfer install files"
