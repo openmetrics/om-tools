@@ -1,6 +1,10 @@
 #!/bin/bash
 #
-# this script will install OpenMetrics agent on a remote host
+# This script is meant to be executed on openmetrics server and will install openmetrics agent on a remote host
+#
+# Requirements:
+#   * an SSH private key ~/.ssh/id_rsa_om
+#	* working SSH pubkey authentication (~/.ssh/id_rsa_om.pub) for root-user on remote host (/root/.ssh/authorized_keys)
 #
 
 set -o errexit # exit on all errors
@@ -29,12 +33,16 @@ fi
 . "${SELF_LOCATION}/om-install.d/defaults.env"
 . "${SELF_LOCATION}/om-install.d/functions.env"
 
-
 # read in om-server configuration (instance.env)
-
+echo -n "Looking for openmetrics server configuration..."
 if [ -f "/opt/openmetrics/config/instance.env" ] ; then
+
     . /opt/openmetrics/config/instance.env
-    env | grep -e '^OM_'
+	echo "OK. I will use these settings for agent installation:"
+	env | grep -e '^OM_' | sort | sed -e 's/\(OM_DB_PASS=\)\(.*\)/\1<striped>/g'
+else
+	echo "FAILED. Could not load /opt/openmetrics/config/instance.env"
+	exit 42
 fi
 
 # dialog defaults
@@ -49,14 +57,14 @@ TMPDIR_E=`echo ${TMPDIR} | sed -e 's/.*om-agent-install\(.*\)/\1/'`
 #TMPDIR="/tmp/${tmp}"
 #mkdir ${TMPDIR}
 #echo "TMPDIR is set to $TMPDIR"
-LOGFILE="${TMPDIR}/install.log"
+LOGFILE="${TMPDIR}/remote-install.log"
 
 # some options to get ssh/scp/svn working for remote access
 SSH_OPTIONS="-i ${HOME}/.ssh/id_rsa_om -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
 # FIXME use getopts and check arguments more acurate
 if [ -z "$2" ] ;then
-	echo "Usage: `basename $0` <hostname|ip of OpenMetrics server> <hostname|ip of install target>" >&2
+	echo "Usage: `basename $0` <hostname|IP address of openmetrics server> <hostname|IP address of install target>" >&2
 	exit 42 
 else
 	HOST="$2"
