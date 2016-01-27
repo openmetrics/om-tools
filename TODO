@@ -10,3 +10,9 @@ EOF
 chown om:crontab /var/spool/cron/crontabs/om
 
 ```
+
+* add /etc/sudoers entry for om-user to execute nmap, traceroute and whois without password
+
+```
+om ALL=NOPASSWD:/usr/bin/traceroute,/usr/bin/whois,/usr/bin/nmap
+```
